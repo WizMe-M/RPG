@@ -6,7 +6,11 @@ Player create()
 {
 	Player player;
 	cout << "\n\t<-- Введите имя персонажа -->\n ";
-	getline(cin, player.Name);
+	do {
+		getline(cin, player.Name);
+
+	} while (player.Name.empty());
+
 	cout << "\n\n\t<-- Выберите класс персонажа -->\n\n";
 
 	string ClassesDescription =
@@ -206,7 +210,7 @@ int InputStringToInt() {
 	string input;
 	do {
 		getline(cin, input);
-	} while (!input.find_first_not_of("0123456789"));
+	} while (!input.find_first_not_of("0123456789") || input.empty());
 	return stoi(input);
 }
 void GetKey() {

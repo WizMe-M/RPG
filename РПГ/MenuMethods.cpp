@@ -83,7 +83,7 @@ void BuyItems(Player& player, Shop& shop)
 
 			cout << "\n Лавочник: Желаете что-нибудь прикупить?";
 			int Choice = ChoiceCheck(shop.Items.size() + 1) - 1;
-			if (Choice == shop.Items.size() + 1) {
+			if (Choice == shop.Items.size()) {
 				cout << "\n Лавочник: До свидания, заходите ещё!";
 				break;
 			}
@@ -121,7 +121,7 @@ void BuyItems(Player& player, Shop& shop)
 			}
 			else cout << "\n Лавочник: Извините, этот предмет раскуплен, выберите другой.";
 		}
-		cout << " Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
+		cout << "\n Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
 		GetKey();
 		break;
 
@@ -141,7 +141,7 @@ void BuyItems(Player& player, Shop& shop)
 				cout << "\n Скупщик: Ну-с, посмотрим, что у вас есть...\n";
 				for (int i = 0; i < player.Inventory.size(); i++)
 					cout << " " << to_string(i + 1) << ". " << player.Inventory.at(i).Name << " | Количество: " << player.Inventory.at(i).Quantity << endl;
-				cout << player.Inventory.size() + 1 << ". Выход";
+				cout << " " << player.Inventory.size() + 1 << ". Выход";
 
 				cout << "\n <-- Выберите предмет на продажу -->";
 				int Choice = ChoiceCheck(player.Inventory.size() + 1);
@@ -170,11 +170,10 @@ void BuyItems(Player& player, Shop& shop)
 					break;
 				}
 			}
-
-			cout << " Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
-			GetKey();
-			break;
 		}
+		cout << "\n Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
+		GetKey();
+		break;
 	}
 }
 void BuyMercenaries(Player& player, Companion& companion, Shop& shop)
@@ -183,16 +182,15 @@ void BuyMercenaries(Player& player, Companion& companion, Shop& shop)
 	{
 		system("cls");
 		cout << "\n\t<-- Найм компаньонов -->\n";
-		cout << " Главарь наёмников: Приветствую и бла-бла. Выбирай бойца.";
+		cout << " Главарь наёмников: Приветствую и бла-бла. Выбирай бойца.\n";
 		for (int i = 0; i < shop.Companions.size(); i++)
-			cout << " " << to_string(i + 1) << ". " << shop.Companions[i].Name << " | Класс: " << shop.Companions[i].Class
-			<< " | Здоровье: " << shop.Companions[i].TotalHP << " | Защита: " << shop.Companions[i].Defence
-			<< " | Урон: " << shop.Companions[i].Damage << " | Количество атак: " << shop.Companions[i].MaxAttackCount << "\n";
-		cout << "\n 6. Выход";
-		cout << "\n Выбор\n";
+			cout << " " << to_string(i + 1) << ". " << shop.Companions.at(i).Name << " | Класс: " << shop.Companions.at(i).Class
+			<< " | Здоровье: " << shop.Companions.at(i).TotalHP << " | Защита: " << shop.Companions.at(i).Defence
+			<< " | Урон: " << shop.Companions.at(i).Damage << " | Количество атак: " << shop.Companions.at(i).MaxAttackCount << "\n";
+		cout << "\n " << shop.Companions.size() + 1 << ". Выход\n";
 
-		int Choice = ChoiceCheck(6) - 1;
-		if (Choice == 6) return;
+		int Choice = ChoiceCheck(shop.Companions.size() + 1) - 1;
+		if (Choice == shop.Companions.size()) return;
 
 		if (!shop.Companions.at(Choice).isSold)
 			if (player.haveCompanion)
@@ -221,6 +219,8 @@ void BuyMercenaries(Player& player, Companion& companion, Shop& shop)
 			}
 		else cout << "\n Этот наёмник уже был нанят.";
 	}
+	cout << "\n Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
+	GetKey();
 }
 void RestInTavern(Player& player, Companion& companion)
 {
@@ -282,7 +282,7 @@ void Dungeon(Player& player, Companion& companion)
 	for (int i = 1; i <= dungeon.DungFloorsCount; i++) {
 		dungeon.DungCurFloor = i;
 		if (dungeon.DungCurFloor == dungeon.DungFloorsCount)
-			if ((double)Random(0, 11) / 10.0 <= dungeon.DungDifficulty)
+			if ((double)Random(0, 100) / 100.0 < dungeon.isDungBoss)
 				ChooseRandomBoss(player, companion, dungeon);
 		ChooseRandomFloor(player, companion, dungeon);
 	}
@@ -397,7 +397,6 @@ void ChooseRandomFloor(Player& player, Companion& companion, SomeDungeon& dungeo
 		cout << "\n 3.Подкрасться к полому сзади и попытаться его убить";
 		cout << "\n 4.Выжидать";
 
-
 		for (int i = 0; i < 5; i++)
 			Enemies.push_back(Enemy(" Полый крестьянин [" + to_string(i + 1) + "]", 0, 80 * dungeon.DungDifficulty, 17 * dungeon.DungDifficulty, 2));
 
@@ -482,6 +481,7 @@ void ChooseRandomFloor(Player& player, Companion& companion, SomeDungeon& dungeo
 	{
 		cout << "\n Вы проходите через врата и оказываетесь в Крепости Сена.";
 		cout << "\n Вдалеке вы можете разглядеть двух змеев, шипящих о чём-то своём. Кажется, они вас не видят.";
+		Sleep(1000);
 		Enemies.push_back(Enemy("Змей-Солдат [1]", 2, Random(40, 55) * dungeon.DungDifficulty, Random(20, 30) * dungeon.DungDifficulty, 2));
 		Enemies.push_back(Enemy("Змей-Маг", 2, Random(30, 36) * dungeon.DungDifficulty, Random(50, 60) * dungeon.DungDifficulty, 3));
 		Enemies.push_back(Enemy("Змей-Солдат [2]", 2, Random(40, 55) * dungeon.DungDifficulty, Random(20, 30) * dungeon.DungDifficulty, 2));
@@ -521,8 +521,9 @@ void ChooseRandomFloor(Player& player, Companion& companion, SomeDungeon& dungeo
 		player.HP -= player.TotalHP / 12;
 		if (player.HP <= 0)
 			player.HP = 1;
-		cout << "\n В ходе скитаний вас заносит в Чумной Город. Здешняя атмосфера негативно сказывается на вашем здоровье (здоровье: " << player.HP << ").";
-		cout << "\n При проходе по доскам на вас нападает Вурдалак и Снайпер с духовой трубкой.";
+		cout << "\n В ходе скитаний вас заносит в Чумной Город. Здешняя атмосфера пагубно сказывается на вашем здоровье (здоровье: " << player.HP << ").";
+		Sleep(1000);
+		cout << "\n При проходе по доскам на вас нападают Вурдалак и Снайпер с духовой трубкой.";
 
 		Enemies.push_back(Enemy("Вурдалак", 3, Random(80, 105) * dungeon.DungDifficulty, Random(15, 20) * dungeon.DungDifficulty, 3));
 		Enemies.push_back(Enemy("Снайпер с духовой трубкой", 0, Random(20, 45) * dungeon.DungDifficulty, 60 * dungeon.DungDifficulty, 4));

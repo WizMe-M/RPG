@@ -35,8 +35,8 @@ void ShowBoss(DungeonBoss boss) {
 
 void ShowHero(Player player, Companion companion) {
 	cout << "\n\t <-- Отряд " << player.Name << " -->";
-	cout << "\n\n |" << player.Name << "|\nКласс: " << player.Class << " |\tЗдоровье: " << player.HP << " / " << player.TotalHP << " |\tЗащита: " << player.Defence << " |\tСредний урон: " << (player.MinDamage + player.Damage) / 2.0;
-	cout << "\n\n |" << companion.Name << "|\nКласс: " << companion.Class << " |\tЗдоровье: " << companion.HP << " / " << companion.TotalHP << " |\tЗащита: " << companion.Defence << " |\t\tУрон: " << companion.Damage;
+	cout << "\n\n |" << player.Name << "|\n Класс: " << player.Class << " |\tЗдоровье: " << player.HP << " / " << player.TotalHP << " |\tЗащита: " << player.Defence << " |\tСредний урон: " << (player.MinDamage + player.Damage) / 2.0;
+	cout << "\n\n |" << companion.Name << "|\n Класс: " << companion.Class << " |\tЗдоровье: " << companion.HP << " / " << companion.TotalHP << " |\tЗащита: " << companion.Defence << " |\t\tУрон: " << companion.Damage;
 	cout << "\n\n";
 }
 
@@ -84,7 +84,7 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 			Choice = ChoiceCheck(Enemies.size() + 1) - 1;
 
 			Enemies.at(Choice).HP -= (Random(player.MinDamage, player.Damage) + player.MagicPower);
-			cout << player.Name << " атакует " << Enemies.at(Choice).Name << " и оставляет ему " << Enemies.at(Choice).HP << " здоровья. ";
+			cout << " " << player.Name << " атакует " << Enemies.at(Choice).Name << " и оставляет ему " << Enemies.at(Choice).HP << " здоровья.\n";
 			CheckDeath(Enemies, DeadEnemies, Choice);
 
 			Sleep(1000);
@@ -95,7 +95,7 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 				else RandAttack = Random(0, Enemies.size());
 
 				Enemies.at(RandAttack).HP -= companion.Damage;
-				cout << companion.Name << " атакует " << Enemies.at(RandAttack).Name << " и оставляет ему "
+				cout << " " << companion.Name << " атакует " << Enemies.at(RandAttack).Name << " и оставляет ему "
 					<< Enemies.at(RandAttack).HP << " здоровья. ";
 				companion.CurAttackCount--;
 				CheckDeath(Enemies, DeadEnemies, RandAttack);
@@ -110,7 +110,7 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 				if (player.Class == "Воин")
 				{
 					cout << "\n <-- Выберите противника для атаки -->\n";
-					Choice = ChoiceCheck(Enemies.size() + 1) - 1;
+					Choice = ChoiceCheck(Enemies.size()) - 1;
 
 					Enemies.at(Choice).HP -= 2 * player.Damage;
 					cout << "\n\n" << player.Name << " атакует \"" << Enemies.at(Choice).Name << "\" рассекающим ударом и оставляет " << Enemies.at(Choice).HP << " здоровья. ";
@@ -143,7 +143,7 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 					if (player.Mana >= 20)
 					{
 						cout << "\n <-- Выберите противника для атаки -->\n";
-						Choice = ChoiceCheck(Enemies.size() + 1) - 1;
+						Choice = ChoiceCheck(Enemies.size()) - 1;
 						player.Mana -= 20;
 						int dealDamage = 3 * player.Damage;
 						Enemies.at(Choice).HP -= dealDamage;
@@ -174,7 +174,10 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 				companion.HP += 50;
 				CheckGreaterPoints(player.HP, player.TotalHP);
 				CheckGreaterPoints(companion.HP, companion.TotalHP);
-				cout << "\n Вы выпили целебный эстус! Ваш отряд восстановил 50 здоровья.";
+				cout << "\n Вы выпили целебный эстус! Ваш отряд восстановил 50 здоровья!";
+				player.Inventory.at(Choice).Quantity--;
+				if (player.Inventory.at(Choice).Quantity == 0)
+					player.Inventory.erase(player.Inventory.begin() + Choice);
 				isActed = true;
 			}
 			else cout << "\n Вы не можете пока применить этот предмет";
@@ -210,7 +213,7 @@ void EnemyTurn(Player& player, Companion& companion, vector<Enemy>& Enemies)
 
 		int dmg = DecreaseDmgByDef(Enemies.at(i).Damage, newTarget.Defence);
 
-		cout << "\n" << Enemies.at(i).Name << " атакует " << newTarget.Name;
+		cout << "\n " << Enemies.at(i).Name << " атакует " << newTarget.Name;
 		if (Random(0, 100) > 17) {
 			cout << " и наносит ему " << dmg << ".";
 			newTarget.HP -= dmg;
@@ -222,7 +225,8 @@ void EnemyTurn(Player& player, Companion& companion, vector<Enemy>& Enemies)
 			player.HP = newTarget.HP;
 			CheckDeath(player);
 		}
-		else {
+		else 
+		{
 			companion.HP = newTarget.HP;
 			CheckDeath(player, companion);
 		}
@@ -266,10 +270,10 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 			if (Random(0, 100) > boss.EvasionChance)
 			{
 				boss.HP -= (Random(player.MinDamage, player.Damage) + player.MagicPower);
-				cout << player.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
+				cout << " " << player.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
 				CheckDeath(boss);
 			}
-			else cout << boss.Name << " уклоняется от атаки " << player.Name << ".\n";
+			else cout << " " << boss.Name << " уклоняется от атаки " << player.Name << ".\n";
 
 			Sleep(1000);
 			if (companion.CurAttackCount != 0)
@@ -277,11 +281,11 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 				if (Random(0, 100) > boss.EvasionChance)
 				{
 					boss.HP -= companion.Damage;
-					cout << companion.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
+					cout << " " << companion.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
 					companion.CurAttackCount--;
 					CheckDeath(boss);
 				}
-				else cout << boss.Name << " уклоняется от атаки " << companion.Name << ".\n";
+				else cout << " " << boss.Name << " уклоняется от атаки " << companion.Name << ".\n";
 			}
 		}
 		break;
@@ -292,7 +296,7 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 				if (player.Class == "Воин")
 				{
 					boss.HP -= 2 * player.Damage;
-					cout << "\n\n" << player.Name << " атакует \"" << boss.Name << "\" рассекающим ударом и оставляет ему " << boss.HP << " здоровья. ";
+					cout << "\n\n " << player.Name << " атакует \"" << boss.Name << "\" рассекающим ударом и оставляет ему " << boss.HP << " здоровья. ";
 					CheckDeath(boss);
 					isActed = true;
 					player.SpecialAbilityCooldown = 2;
@@ -307,7 +311,7 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 						Sleep(300);
 						player.Mana -= player.MaxMana / 2;
 						boss.HP -= 3 * (player.MagicPower + player.Damage);
-						cout << player.Name << " наносит " << (player.MagicPower + player.Damage) << " урона \"" << boss.Name << "\" и оставляет ему " << boss.HP << " здоровья. ";
+						cout << " " << player.Name << " наносит " << (player.MagicPower + player.Damage) << " урона \"" << boss.Name << "\" и оставляет ему " << boss.HP << " здоровья. ";
 						CheckDeath(boss);
 						isActed = true;
 						player.SpecialAbilityCooldown = 4;
@@ -323,7 +327,7 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 						player.Mana -= 20;
 						int dealDamage = 2 * player.Damage + player.MagicPower;
 						boss.HP -= dealDamage;
-						cout << player.Name << " атакует \"" << boss.Name << "\" метким выстрелом, оставляя ему " << boss.HP << " здоровья. ";
+						cout << " " << player.Name << " атакует \"" << boss.Name << "\" метким выстрелом, оставляя ему " << boss.HP << " здоровья. ";
 						CheckDeath(boss);
 						isActed = true;
 						player.SpecialAbilityCooldown = 3;
@@ -339,18 +343,22 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 		{
 			cout << "\n\t<-- Выберите предмет в инвентаре -->";
 			for (int i = 0; i < player.Inventory.size(); i++)
-				cout << to_string(i + 1) << ". " << player.Inventory.at(i).Name << "\n";
-			cout << to_string(player.Inventory.size() + 1) << ". Назад";
+				cout << " " << to_string(i + 1) << ". " << player.Inventory.at(i).Name << "\n";
+			cout << " " << player.Inventory.size() + 1 << ". Назад";
 
-			Choice = ChoiceCheck(player.Inventory.size() + 1);
+			Choice = ChoiceCheck(player.Inventory.size() + 1) - 1;
+			if (Choice == ChoiceCheck(player.Inventory.size())) break;
 			if (player.Inventory.at(Choice).Name == "Эстус")
 			{
 				player.HP += 50;
 				companion.HP += 50;
 				CheckGreaterPoints(player.HP, player.TotalHP);
 				CheckGreaterPoints(companion.HP, companion.TotalHP);
-				cout << "\n Вы выпили целебный эстус!";
-				isActed = true;
+				cout << "\n Вы выпили целебный эстус! Ваш отряд восстановил 50 здоровья!";
+				isActed = true; 
+				player.Inventory.at(Choice).Quantity--;
+				if (player.Inventory.at(Choice).Quantity == 0)
+					player.Inventory.erase(player.Inventory.begin() + Choice);
 			}
 			else cout << "\n Вы не можете пока применить этот предмет";
 		}
