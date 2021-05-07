@@ -3,9 +3,8 @@
 #include <windows.h>
 #include <iostream>
 #include <vector>
+
 #include "Helper.h"
-#include "Player.h"
-using namespace std;
 
 //Класс цели для атаки противника
 class Target {
@@ -48,3 +47,5 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss);
 
 //Combat. Ход босса 
 void EnemyTurn(Player& player, Companion& companion, DungeonBoss& boss);
+
+

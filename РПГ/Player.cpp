@@ -1,12 +1,13 @@
 #pragma once
 #include "Player.h"
+#include <conio.h>
 using namespace std;
 Player create()
 {
 	Player player;
-	cout << " Введите имя персонажа: ";
-	cin >> player.Name;
-	cout << "\n Выберите класс персонажа: \n\n";
+	cout << "\n\t<-- Введите имя персонажа -->\n ";
+	getline(cin, player.Name);
+	cout << "\n\n\t<-- Выберите класс персонажа -->\n\n";
 
 	string ClassesDescription =
 		" 1. Воин – имеет большое количество здоровья и повышенную защиту, хорошие показатели атаки, но полностью отсутствуют магические силы.\n\n"
@@ -88,7 +89,9 @@ Player create()
 	player.MaxMana = player.Mana;
 	player.Gold = 100;
 	player.InventoryMaxCapacity = 10;
-	player.Inventory->at(0) = (Item("Эстус", 0, 3));
+	player.Inventory.push_back(Item("Эстус", 0, 3));
+	player.haveCompanion = true;
+	player.SpecialAbilityCooldown = 0;
 	system("cls");
 	cout << "\n\n\tСоздаём персонажа";
 	for (int i = 0; i < 3; i++)
@@ -187,4 +190,25 @@ Player create()
 		//	Sleep(3000);
 	}
 	return player;
+}
+
+int ChoiceCheck(int max)
+{
+	int Choice = 0;
+	while (Choice > max || Choice <= 0)
+	{
+		cout << "\n Выбор: ";
+		Choice = InputStringToInt();
+	}
+	return Choice;
+}
+int InputStringToInt() {
+	string input;
+	do {
+		getline(cin, input);
+	} while (!input.find_first_not_of("0123456789"));
+	return stoi(input);
+}
+void GetKey() {
+	int i = _getch();
 }

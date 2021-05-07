@@ -1,5 +1,4 @@
 #include "Combat.h"
-
 using namespace std;
 
 void ShowEnemies(vector<Enemy> Enemies, vector<Enemy> DeadEnemies)
@@ -12,10 +11,10 @@ void ShowEnemies(vector<Enemy> Enemies, vector<Enemy> DeadEnemies)
 			cout << " |" << en.Name << "(Уровень: " << en.Level << ")|\t";
 	}
 
-	cout << "\n\t<-- Отряд противника -->";
-	cout << "\n Количество противников: " << Enemies.size() << "\n ";
+	cout << "\n\n\t<-- Отряд противника -->";
+	cout << "\n Количество противников: " << Enemies.size() << "\n";
 	for (int i = 0; i < Enemies.size(); i++) {
-		cout << to_string(i + 1) << ". " << Enemies.at(i).Name
+		cout << " " << to_string(i + 1) << ". " << Enemies.at(i).Name
 			<< " | Уровень: " << Enemies.at(i).Level
 			<< " | Раса: " << Enemies.at(i).Race
 			<< " | Здоровье: " << Enemies.at(i).HP << "/" << Enemies.at(i).BaseHP
@@ -36,14 +35,20 @@ void ShowBoss(DungeonBoss boss) {
 
 void ShowHero(Player player, Companion companion) {
 	cout << "\n\t <-- Отряд " << player.Name << " -->";
-	cout << "\n\n |" << player.Name << "|\nКласс: " << player.Class << "\tЗдоровье: " << player.HP << " / " << player.TotalHP << "\tЗащита: " << player.Defence << "\tУрон: " << (player.MinDamage + player.Damage) / 2.0;
-	cout << "\n\n |" << companion.Name << "|\nКласс: " << companion.Class << "\tЗдоровье: " << companion.HP << " / " << companion.TotalHP << "\tЗащита: " << companion.Defence << "\tУрон: " << companion.Damage;
+	cout << "\n\n |" << player.Name << "|\nКласс: " << player.Class << " |\tЗдоровье: " << player.HP << " / " << player.TotalHP << " |\tЗащита: " << player.Defence << " |\tСредний урон: " << (player.MinDamage + player.Damage) / 2.0;
+	cout << "\n\n |" << companion.Name << "|\nКласс: " << companion.Class << " |\tЗдоровье: " << companion.HP << " / " << companion.TotalHP << " |\tЗащита: " << companion.Defence << " |\t\tУрон: " << companion.Damage;
 	cout << "\n\n";
 }
 
 void Combat(Player& player, Companion& companion, vector<Enemy>& Enemies)
 {
 	vector<Enemy> DeadEnemies;
+	for (int i = 0; i < Enemies.size(); i++)
+		if (Enemies.at(i).HP <= 0) {
+			DeadEnemies.push_back(Enemies.at(i));
+			Enemies.erase(Enemies.begin() + i);
+		}
+
 	while (Enemies.size() != 0)
 	{
 		PlayerTurn(player, companion, Enemies, DeadEnemies);
@@ -58,6 +63,8 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 {
 	bool isActed = false;
 	int Choice = 0;
+	if (player.SpecialAbilityCooldown != 0)
+		player.SpecialAbilityCooldown--;
 	while (!isActed)
 	{
 		ShowEnemies(Enemies, DeadEnemies);
@@ -76,13 +83,9 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 			cout << "\n <-- Выберите противника для атаки -->\n";
 			Choice = ChoiceCheck(Enemies.size() + 1) - 1;
 
-			if (Random(0, 100) > 25)
-			{
-				Enemies.at(Choice).HP -= (Random(player.MinDamage, player.Damage) + player.MagicPower);
-				cout << player.Name << " атакует " << Enemies.at(Choice).Name << " и оставляет ему " << Enemies.at(Choice).HP << " здоровья. ";
-				CheckDeath(Enemies, DeadEnemies, Choice);
-			}
-			else cout << player.Name << " атакует " << Enemies.at(Choice - 1).Name << " и промахивается.\n";
+			Enemies.at(Choice).HP -= (Random(player.MinDamage, player.Damage) + player.MagicPower);
+			cout << player.Name << " атакует " << Enemies.at(Choice).Name << " и оставляет ему " << Enemies.at(Choice).HP << " здоровья. ";
+			CheckDeath(Enemies, DeadEnemies, Choice);
 
 			Sleep(1000);
 			if (companion.CurAttackCount != 0 && Enemies.size() != 0)
@@ -102,59 +105,69 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 		}
 		case 2:
 		{
-			if (player.Class == "Воин")
+			if (player.SpecialAbilityCooldown == 0)
 			{
-				cout << "\n <-- Выберите противника для атаки -->\n";
-				Choice = ChoiceCheck(Enemies.size() + 1) - 1;
-
-				Enemies.at(Choice).HP -= 2 * player.Damage;
-				cout << "\n\n" << player.Name << " атакует " << Enemies.at(Choice).Name << " рассекающим ударом и оставляет " << Enemies.at(Choice).HP << " здоровья. ";
-				CheckDeath(Enemies, DeadEnemies, Choice);
-				isActed = true;
-			}
-			if (player.Class == "Маг")
-			{
-				if (player.Mana >= player.MaxMana / 2) {
-					cout << "\n\n " << player.Name << " колдует огненный шар и атакует им всех противников. ";
-					player.Mana -= player.MaxMana / 2;
-					for (int i = 0; i < Enemies.size(); i++)
-					{
-						Enemies.at(i).HP -= 3 * (player.MagicPower + player.Damage);
-						cout << "\n " << player.Name << " наносит " << 3 * (player.MagicPower + player.Damage) << " урона противнику "
-							<< Enemies.at(i).Name << " и оставляет ему" << Enemies.at(i).HP << " здоровья. ";
-						CheckDeath(Enemies, DeadEnemies, i);
-					}
-					isActed = true;
-				}
-				else cout << "\n Недостаточно маны для применения способности. "
-					<< "\n Нужно иметь больше половины от максимального запаса маны (" << player.MaxMana / 2 << ").";
-			}
-			if (player.Class == "Лучник")
-			{
-				if (player.Mana >= 20)
+				if (player.Class == "Воин")
 				{
 					cout << "\n <-- Выберите противника для атаки -->\n";
 					Choice = ChoiceCheck(Enemies.size() + 1) - 1;
-					player.Mana -= 20;
-					int dealDamage = 3 * player.Damage;
-					Enemies.at(Choice).HP -= dealDamage;
-					cout << player.Name << " ранит " << Enemies.at(Choice).Name << " метким выстрелом, оставляя ему "
-						<< Enemies.at(Choice).HP << " здоровья. ";
+
+					Enemies.at(Choice).HP -= 2 * player.Damage;
+					cout << "\n\n" << player.Name << " атакует \"" << Enemies.at(Choice).Name << "\" рассекающим ударом и оставляет " << Enemies.at(Choice).HP << " здоровья. ";
 					CheckDeath(Enemies, DeadEnemies, Choice);
 					isActed = true;
+					player.SpecialAbilityCooldown = 2;
+					cout << "\n Ваша способность уходит на перезарядку (" << player.SpecialAbilityCooldown << ").";
 				}
-				else cout << "\n Недостаточно маны для применения особого умения (нужно по-крайней мере 20 маны).";
+				if (player.Class == "Маг")
+				{
+					if (player.Mana >= player.MaxMana / 2) {
+						cout << "\n\n " << player.Name << " колдует огненный шар и атакует им всех противников. ";
+						player.Mana -= player.MaxMana / 2;
+						for (int i = 0; i < Enemies.size(); i++)
+						{
+							Enemies.at(i).HP -= 3 * (player.MagicPower + player.Damage);
+							cout << "\n " << player.Name << " наносит " << 3 * (player.MagicPower + player.Damage) << " урона противнику "
+								<< Enemies.at(i).Name << " и оставляет ему" << Enemies.at(i).HP << " здоровья. ";
+							CheckDeath(Enemies, DeadEnemies, i);
+						}
+						isActed = true;
+						player.SpecialAbilityCooldown = 4;
+						cout << "\n Ваша способность уходит на перезарядку (" << player.SpecialAbilityCooldown << ").";
+					}
+					else cout << "\n Недостаточно маны для применения способности. "
+						<< "\n Нужно иметь больше половины от максимального запаса маны (" << player.MaxMana / 2 << ").";
+				}
+				if (player.Class == "Лучник")
+				{
+					if (player.Mana >= 20)
+					{
+						cout << "\n <-- Выберите противника для атаки -->\n";
+						Choice = ChoiceCheck(Enemies.size() + 1) - 1;
+						player.Mana -= 20;
+						int dealDamage = 3 * player.Damage;
+						Enemies.at(Choice).HP -= dealDamage;
+						cout << player.Name << " ранит " << Enemies.at(Choice).Name << " метким выстрелом, оставляя ему "
+							<< Enemies.at(Choice).HP << " здоровья. ";
+						CheckDeath(Enemies, DeadEnemies, Choice);
+						isActed = true;
+						player.SpecialAbilityCooldown = 3;
+						cout << "\n Ваша способность уходит на перезарядку (" << player.SpecialAbilityCooldown << ").";
+					}
+					else cout << "\n Недостаточно маны для применения особого умения (нужно по-крайней мере 20 маны).";
+				}
 			}
+			else cout << "\n Ваша способность ещё на перезарядке!";
 		}
 		break;
 		case 3:
 		{
-			cout << "\n\t<-- Выберите предмет в инвентаре -->";
+			cout << "\n\t<-- Выберите предмет в инвентаре -->\n";
 			for (int i = 0; i < player.Inventory.size(); i++)
 				cout << to_string(i + 1) << ". " << player.Inventory.at(i).Name << "\n";
 			cout << to_string(player.Inventory.size() + 1) << ". Назад";
 
-			Choice = ChoiceCheck(player.Inventory.size() + 1);
+			Choice = ChoiceCheck(player.Inventory.size() + 1) - 1;
 			if (player.Inventory.at(Choice).Name == "Эстус")
 			{
 				player.HP += 50;
@@ -182,12 +195,12 @@ void EnemyTurn(Player& player, Companion& companion, vector<Enemy>& Enemies)
 	ShowHero(player, companion);
 
 	for (int i = 0; i < Enemies.size(); i++) {
-
+		Sleep(300);
 		//создаём шаблон цели для атаки (нужно, чтобы удобно было работать с рандомом между игроком и компаньоном). по умолчанию это игрок
 		Target newTarget = Target(player.Name, "Игрок", player.HP, player.Defence);
 
 		//даём возможность компаньону стать целью для атаки
-		if (player.haveCompanion) 
+		if (player.haveCompanion)
 		{
 			if (companion.Class == "Воин") {
 				if (Random(0, 100) > 50) newTarget = Target(companion.Name, "Компаньон", companion.HP, companion.Defence);
@@ -198,7 +211,7 @@ void EnemyTurn(Player& player, Companion& companion, vector<Enemy>& Enemies)
 		int dmg = DecreaseDmgByDef(Enemies.at(i).Damage, newTarget.Defence);
 
 		cout << "\n" << Enemies.at(i).Name << " атакует " << newTarget.Name;
-		if (Random(0, 100) > 35) {
+		if (Random(0, 100) > 17) {
 			cout << " и наносит ему " << dmg << ".";
 			newTarget.HP -= dmg;
 			cout << " Здоровье " << newTarget.Name << ": " << newTarget.HP;
@@ -213,6 +226,7 @@ void EnemyTurn(Player& player, Companion& companion, vector<Enemy>& Enemies)
 			companion.HP = newTarget.HP;
 			CheckDeath(player, companion);
 		}
+		Sleep(12);
 	}
 	cout << "\n\n Нажмите любую клавишу, чтобы получить свой ход.";
 	GetKey();
@@ -233,6 +247,8 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 {
 	bool isActed = false;
 	int Choice = 0;
+	if (player.SpecialAbilityCooldown != 0)
+		player.SpecialAbilityCooldown--;
 	while (!isActed) {
 		ShowBoss(boss);
 		ShowHero(player, companion);
@@ -249,59 +265,74 @@ void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss)
 		{
 			if (Random(0, 100) > boss.EvasionChance)
 			{
-				boss.HP -= Random(player.MinDamage, player.Damage);
+				boss.HP -= (Random(player.MinDamage, player.Damage) + player.MagicPower);
 				cout << player.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
 				CheckDeath(boss);
 			}
-			else cout << player.Name << " атакует " << boss.Name << " и промахивается.\n";
+			else cout << boss.Name << " уклоняется от атаки " << player.Name << ".\n";
 
 			Sleep(1000);
-			if (companion.CurAttackCount != 0 && Random(0, 100) > boss.EvasionChance)
+			if (companion.CurAttackCount != 0)
 			{
-				boss.HP -= companion.Damage;
-				cout << companion.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
-				companion.CurAttackCount--;
-				CheckDeath(boss);
+				if (Random(0, 100) > boss.EvasionChance)
+				{
+					boss.HP -= companion.Damage;
+					cout << companion.Name << " атакует " << boss.Name << " и оставляет ему " << boss.HP << " здоровья. ";
+					companion.CurAttackCount--;
+					CheckDeath(boss);
+				}
+				else cout << boss.Name << " уклоняется от атаки " << companion.Name << ".\n";
 			}
 		}
 		break;
 		case 2:
 		{
-			if (player.Class == "Воин")
+			if (player.SpecialAbilityCooldown == 0) 
 			{
-				boss.HP -= 2 * player.Damage;
-				cout << "\n\n" << player.Name << " атакует " << boss.Name << " рассекающим ударом и оставляет ему " << boss.HP << " здоровья. ";
-				CheckDeath(boss);
-				isActed = true;
-			}
-			if (player.Class == "Маг")
-			{
-				if (player.Mana >= player.MaxMana / 2) {
-
-					cout << "\n";
-					cout << "\n " << player.Name << " колдует огненный шар и атакует им " << boss.Name << ".\n";
-					player.Mana -= player.MaxMana / 2;
-					boss.HP -= 3 * (player.MagicPower + player.Damage);
-					cout << player.Name << " наносит " << (player.MagicPower + player.Damage) << " урона " << boss.Name << " и оставляет ему" << boss.HP << " здоровья. ";
-					CheckDeath(boss);
-					isActed = true;
-				}
-				else cout << "\n Недостаточно маны для применения особого умения. "
-					<< "\n Нужно иметь больше половины от максимального запаса маны (" << player.MaxMana / 2 << ").";
-			}
-			if (player.Class == "Лучник")
-			{
-				if (player.Mana >= 20)
+				if (player.Class == "Воин")
 				{
-					player.Mana -= 20;
-					int dealDamage = 2 * player.Damage + player.MagicPower;
-					boss.HP -= dealDamage;
-					cout << player.Name << " атакует " << boss.Name << " метким выстрелом, оставляя ему " << boss.HP << " здоровья. ";
+					boss.HP -= 2 * player.Damage;
+					cout << "\n\n" << player.Name << " атакует \"" << boss.Name << "\" рассекающим ударом и оставляет ему " << boss.HP << " здоровья. ";
 					CheckDeath(boss);
 					isActed = true;
+					player.SpecialAbilityCooldown = 2;
+					cout << "\n Ваша способность уходит на перезарядку (" << player.SpecialAbilityCooldown << ").";
 				}
-				else cout << "\n Недостаточно маны для применения особого умения (нужно по-крайней мере 20 маны).";
+				if (player.Class == "Маг")
+				{
+					if (player.Mana >= player.MaxMana / 2) {
+
+						cout << "\n";
+						cout << "\n " << player.Name << " колдует огненный шар и атакует им \"" << boss.Name << "\".\n";
+						Sleep(300);
+						player.Mana -= player.MaxMana / 2;
+						boss.HP -= 3 * (player.MagicPower + player.Damage);
+						cout << player.Name << " наносит " << (player.MagicPower + player.Damage) << " урона \"" << boss.Name << "\" и оставляет ему " << boss.HP << " здоровья. ";
+						CheckDeath(boss);
+						isActed = true;
+						player.SpecialAbilityCooldown = 4;
+						cout << "\n Ваша способность уходит на перезарядку (" << player.SpecialAbilityCooldown << ").";
+					}
+					else cout << "\n Недостаточно маны для применения особого умения. "
+						<< "\n Нужно иметь больше половины от максимального запаса маны (" << player.MaxMana / 2 << ").";
+				}
+				if (player.Class == "Лучник")
+				{
+					if (player.Mana >= 20)
+					{
+						player.Mana -= 20;
+						int dealDamage = 2 * player.Damage + player.MagicPower;
+						boss.HP -= dealDamage;
+						cout << player.Name << " атакует \"" << boss.Name << "\" метким выстрелом, оставляя ему " << boss.HP << " здоровья. ";
+						CheckDeath(boss);
+						isActed = true;
+						player.SpecialAbilityCooldown = 3;
+						cout << "\n Ваша способность уходит на перезарядку (" << player.SpecialAbilityCooldown << ").";
+					}
+					else cout << "\n Недостаточно маны для применения особого умения (нужно по-крайней мере 20 маны).";
+				}
 			}
+			else cout << "\n Ваша способность ещё на перезарядке!";
 		}
 		break;
 		case 3:

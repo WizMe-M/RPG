@@ -1,8 +1,7 @@
 ﻿#include <iostream>
 #include <string>
 #include <ctime>
-#include "Helper.h"
-#include "Combat.h"
+#include "MenuMethods.h"
 #include "Player.h"
 
 using namespace std;
@@ -15,7 +14,7 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 
-    Player player;
+    Player player = create();
 
 	Companion companion("Лаврентий", "Воин", 160, 120, 35, 10, 20, 40, true, 0);
 
