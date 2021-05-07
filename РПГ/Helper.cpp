@@ -5,14 +5,229 @@
 #include <conio.h>
 #include <ctime>
 #include <iostream>
-
+#include <vector>
 using namespace std;
-using std::string;
 
-int Random(int min, int max) 
+
+
+/*Здесь находятся системные функции, упрощающие написание кода*/
+
+Reward CalculateReward(double difficulty, vector<Enemy>& deadEnemies) {
+	Reward r;
+	r.Gold = 0;
+	r.Experience = 0;
+
+	int classtype = 1;
+	for (int i = 0; i < deadEnemies.size(); i++)
+	{
+		r.Gold += deadEnemies.at(i).Level * 10;
+		r.Experience += deadEnemies.at(i).Level * 4;
+
+		switch (deadEnemies.at(i).RaceType) {
+		case 0:
+			r.Gold *= 1.2;
+			break;
+		case 1:
+			r.Experience *= 1.2;
+			r.Gold *= 2;
+			break;
+		case 2:
+			r.Experience *= 1.1;
+			r.Gold *= 1.2;
+			break;
+		case 3:
+			r.Experience *= 1.3;
+			break;
+		case 4:
+			r.Experience *= 1.4;
+			r.Gold *= 1.1;
+			break;
+		case 5:
+			r.Experience *= 2;
+			r.Gold *= 2;
+			break;
+		case 6:
+			r.Experience *= 1.1;
+			r.Gold *= 0.9;
+			break;
+		}
+
+	}
+	r.Experience *= difficulty;
+	r.Gold *= difficulty;
+
+	vector<Enemy>().swap(deadEnemies);
+
+	return r;
+}
+Reward CalculateReward(double difficulty, DungeonBoss boss) {
+	Reward r;
+	r.Gold = boss.Gold * difficulty;
+	r.Experience = boss.Exp * difficulty;
+
+	switch (boss.RaceType) {
+	case 0:
+		r.Gold *= 1.2;
+		break;
+	case 1:
+		r.Experience *= 1.2;
+		r.Gold *= 2;
+		break;
+	case 2:
+		r.Experience *= 1.1;
+		r.Gold *= 1.2;
+		break;
+	case 3:
+		r.Experience *= 1.3;
+		break;
+	case 4:
+		r.Experience *= 1.4;
+		r.Gold *= 1.1;
+		break;
+	case 5:
+		r.Experience *= 2;
+		r.Gold *= 2;
+		break;
+	case 6:
+		r.Experience *= 1.1;
+		r.Gold *= 0.9;
+		break;
+	}
+	return r;
+}
+void GiveReward(Player& player, Reward reward) {
+	player.Experience += reward.Experience;
+	player.Gold += reward.Gold;
+
+	cout << "\n Нажмите любую клавишу, чтобы принять награду.";
+	GetKey();
+	while (player.Experience >= player.MaxExp)
+		LevelUp(player);
+}
+void LevelUp(Player& player) {
+
+	system("cls");
+	cout << "\n Сегодня вы научились лучше обращаться с оружием... \n";
+	cout << "\n\t\tУРОВЕНЬ ПОВЫШЕН! \n";
+	player.Level++;
+	player.Experience -= player.MaxExp;
+	player.MaxExp += 2;
+	player.TotalHP += player.HPperLVL;
+	player.HP = player.TotalHP;
+	player.Damage += player.DMGperLVL;
+	player.MinDamage += player.DMGperLVL;
+	player.Defence += player.DEFperLVL;
+	player.MagicPower += player.MPperLVL;
+	player.MaxMana += player.MANAperLVL;
+	player.Mana = player.MaxMana;
+
+	cout << "\n Ваши характеристики увеличены: \n";
+	cout << " Класс: " << player.Class << "\n";
+	cout << " Уровень: " << player.Level << "\n";
+	cout << " Опыт: " << player.Experience << " / " << player.MaxExp << "\n";
+	cout << " Здоровье: " << player.HP << " / " << player.TotalHP << "\n";
+	cout << " Урон: " << (player.Damage + player.MinDamage) / 2 << "\n";
+	cout << " Защита: " << player.Defence << "\n";
+	cout << " Магическая сила: " << player.MagicPower << "\n";
+	cout << " Мана: " << player.Mana << " / " << player.MaxMana << "\n";
+	if (player.InventoryMaxCapacity != 25) {
+		player.InventoryMaxCapacity++;
+		cout << " Объём вашего рюкзака увеличен на 1. Текущая его вместимость: "
+			<< player.CurrentInventoryCapacity << " / " << player.InventoryMaxCapacity << "\n";
+	}
+	cout << " \n";
+
+	cout << "\n Выберите какую характеристику вы хотите дополнительно увеличить: ";
+	cout << "\n 1.Здоровье \n 2.Урон \n 3.Защита \n 4.Магическая сила \n 5.Мана \n";
+	int up;
+	switch (ChoiceCheck(5)) {
+	case 1:
+		up = player.HPperLVL + 10;
+		cout << "\n Здоровье увеличено на " << up << "\n";
+		player.TotalHP += up;
+		player.HP = player.TotalHP;
+		break;
+	case 2:
+		up = player.DMGperLVL * 1.5;
+		cout << "\n Урон увеличен на " << up << "\n";
+		player.Damage += up;
+		player.MinDamage += up;
+		break;
+	case 3:
+		up = player.DEFperLVL * 2 + 5;
+		cout << "\n Защита увеличена на " << up << "\n";
+		player.Defence += up;
+		break;
+	case 4:
+		up = player.MPperLVL + 5;
+		cout << "\n Магическая сила увеличена на " << up << "\n";
+		player.MagicPower += up;
+		break;
+	case 5:
+		up = player.MaxMana * 2;
+		cout << "\n Мана увеличена на " << up << "\n";
+		player.MaxMana += up;
+		player.Mana = player.MaxMana;
+		break;
+	}
+
+	//каждый четный уровень можно немного ускорить развитие какой-то статы
+	if (player.Level % 2 == 0)
+	{
+		cout << "\n В этот раз вы узнали немного больше, чем обычно!";
+		cout << "\n Теперь вы развиваетесь быстрее.";
+		cout << "\n Выберите характеристику, ускорить развитие которой вы хотите: ";
+		cout << "\n 1.Здоровье \n 2.Урон \n 3.Защита \n 4.Магическая сила \n 5.Мана \n";
+
+		switch (ChoiceCheck(5)) {
+		case 1:
+			player.HPperLVL = (player.HPperLVL * 1.3) + 2;
+			break;
+		case 2:
+			player.DMGperLVL *= 1.15;
+			break;
+		case 3:
+			player.DEFperLVL = (player.DEFperLVL * 1.2) + 2;
+			break;
+		case 4:
+			player.MPperLVL + 2;
+			break;
+		case 5:
+			player.MaxMana += 3;
+			break;
+		}
+		cout << "\n\n Боги милостивы. Да будет так!";
+		Sleep(3000);
+	}
+
+}
+int DecreaseDmgByDef(int damage, int defence) {
+	int decreasePercent = defence / 7 + 5;
+	if (decreasePercent > 70)
+		decreasePercent = 70;
+	damage -= damage / decreasePercent;
+	return damage;
+}
+int ChoiceCheck(int max)
+{
+	int Choice = 0;
+	while (Choice > max || Choice <= 0)
+	{
+		cout << "\n Выбор: ";
+		Choice = InputStringToInt();
+	}
+	return Choice;
+}
+int InputStringToInt() {
+	string input;
+	do {
+		getline(cin, input);
+	} while (!(input.find_first_not_of("0123456789") && input.length() == 1));
+	return stoi(input);
+}
+int Random(int min, int max)
 {
 	srand(time(NULL));
-
 	if (min > 0)
 	{
 		return min + rand() % (max - min);
@@ -22,686 +237,821 @@ int Random(int min, int max)
 		return min + rand() % (abs(min) + max);
 	}
 }
-
-bool CheckDeath(Enemy& newEnemy, int i) 
+void CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
 {
-	if (newEnemy.EnemyHP[i] < 0) 
+	if (Enemies.at(id).HP <= 0)
 	{
-		return true;
+		DeadEnemies.push_back(Enemies.at(id));
+		Enemies.erase(Enemies.begin() + id);
 	}
-	return false;
 }
-
-int ChoiceCheck(int max) 
+void CheckDeath(DungeonBoss& boss)
 {
-	int Choice = 0;
-
-	while (Choice > max || Choice <= 0) 
+	if (boss.HP <= 0)
 	{
-		cout << " \n";
-
-		cout << " Выбор: ";
-		cin >> Choice;
+		boss.Name += " (МЁРТВ)";
+		boss.isDead = true;
 	}
-
-	return Choice;
 }
+void CheckDeath(Player player) {
+	Sleep(1000);
+	if (player.HP <= 0) {
+		system("cls");
+		cout << "\n\n\n \t\t YOU DIED \n\n";
 
-bool CheckMoney(int Gold, int price) 
-{
-	if (Gold >= price) 
-	{
-		return true;
+		cout << "\tВаша статистика за этот забег:\n";
+		cout << "\t" << player.Name << " характеристики: \n";
+		cout << "\tКласс: " << player.Class << "\n";
+		cout << "\tУровень: " << player.Level << "\n";
+		cout << "\tОпыт: " << player.Experience << " / " << player.MaxExp << "\n";
+		cout << "\tЗдоровье: " << player.HP << " / " << player.TotalHP << "\n";
+		cout << "\tУрон: " << (player.Damage + player.MinDamage) / 2 << "\n";
+		cout << "\tЗащита: " << player.Defence << "\n";
+		cout << "\tМагическая сила: " << player.MagicPower << "\n";
+		cout << "\tМана: " << player.Mana << " / " << player.MaxMana << "\n";
+		cout << "\tЗолото: " << player.Gold << "\n";
+		cout << "\n";
+		cout << "\n\n\n" << endl;
+		cout << "\tНажмите любую кнопку " << endl;
+		GetKey();
+		exit(0);
 	}
+}
+void CheckDeath(Player& p, Companion& c) {
+	Sleep(1000);
+	if (c.HP <= 0) {
+		p.haveCompanion = false;
+		c.Name = "Мёртв";
+		c.HP = 0;
+	}
+}
+void CheckGreaterPoints(int& points, int max_points) {
+	if (points > max_points)
+		points = max_points;
+}
+void GetKey() {
+	int i = _getch();
+}
+bool CheckMoney(int Gold, int price)
+{
+	if (Gold >= price)
+		return true;
 	else
-	{
 		return false;
-	}
 }
 
-void BuyItems(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
+/*Здесь находятся функции, необходимые для организации алгоритма работы программы*/
+
+void MainMenu(Player& player, Companion& сompanion, Shop& shop)
 {
-	system("cls");
-
-	cout << " 1. Купить снаряжение.\n";
-	cout << " 2. Продать снаряжение. \n";
-
-	bool isBuying = true;
-	
-	cout << " \n";
-
-	switch (ChoiceCheck(2))
-	{
-	case 1: 
-	{
-		while (isBuying == true)
-		{
-			system("cls");
-
-			cout << " Доступные товары: \n";
-
-			int k = 1;
-
-			for (int i = 0; i < 5; i++) 
-			{
-				cout << " " << std::to_string(k) + ".  Товар: " << newShop.BuyItemName[i] << " | Количество: " << newShop.ItemQuantity[i]
-					<< " | Цена: " << newShop.ItemPrice[i] << "\n";
-				k++;
-			}
-
-			cout << " \n";
-
-			cout << " 6. Вернуться в таверну\n";
-
-			switch (ChoiceCheck(6))
-			{
-			case 1: 
-			{
-				if (newShop.ItemQuantity[0] > 0) {
-					if (CheckMoney(player.PlayerGold, 300) == true)
-					{
-						if (player.CurrentInventoryCapacity < player.InventoryMaxCapacity)
-						{
-							player.Inventory[player.CurrentInventoryCapacity] = " Эстус";
-							player.CurrentInventoryCapacity++;
-
-							newShop.ItemQuantity[0] = newShop.ItemQuantity[0] - 1;
-
-							cout << "\n Товар куплен."; 
-							Sleep(2000);
-						}
-						else 
-						{
-							cout << " Недостаточно места в инвентаре."; 
-							break;  
-							Sleep(2000);
-						}
-					}
-					else 
-					{
-						cout << " Недостаточно золота!"; Sleep(2000);
-					}
-				}
-				else 
-				{ 
-					cout << " Хозяин таверны: На складке закончился этот товар, приходи позже!"; 
-					Sleep(2000); 
-				}
-			} 
-			break;
-			case 2: 
-			{
-				if (newShop.ItemQuantity[0] > 0)
-				{
-					if (CheckMoney(player.PlayerGold, 1500) == true)
-					{
-						if (player.CurrentInventoryCapacity < player.InventoryMaxCapacity)
-						{
-							player.CurrentInventoryCapacity++;
-							player.Inventory[player.CurrentInventoryCapacity] = " Оружие";
-
-							newShop.ItemQuantity[0] = newShop.ItemQuantity[0] - 1;
-
-							cout << "\n Товар куплен."; Sleep(2000);
-						}
-						else 
-						{
-							cout << " Недостаточно места в инвентаре."; 
-							Sleep(2000);
-						}
-					}
-					else 
-					{
-						cout << " Недостаточно золота!"; 
-						Sleep(2000);
-					}
-				}
-				else 
-				{ 
-					cout << " Хозяин таверны: На складке закончился этот товар, приходи позже!"; 
-					Sleep(2000); 
-				}
-			} 
-			break;
-			case 3: 
-			{
-				if (newShop.ItemQuantity[2] > 0)
-				{
-					if (CheckMoney(player.PlayerGold, 1000) == true)
-					{
-
-
-						if (player.CurrentInventoryCapacity < player.InventoryMaxCapacity)
-						{
-							player.CurrentInventoryCapacity++;
-							player.Inventory[player.CurrentInventoryCapacity] = " Кольца";
-
-							newShop.ItemQuantity[2] = newShop.ItemQuantity[2] - 1;
-
-							cout << "\n Товар куплен."; 
-							Sleep(2000);
-						}
-						else
-						{
-							cout << " Недостаточно места в инвентаре.";
-							Sleep(2000);
-						}
-					}
-					else 
-					{
-						cout << " Недостаточно золота!"; 
-						Sleep(2000);
-					}
-				}
-				else 
-				{ 
-					cout << " Хозяин таверны: На складке закончился этот товар, приходи позже!"; 
-					Sleep(2000); 
-				}
-			} 
-			break;
-			case 4: 
-			{
-				if (newShop.ItemQuantity[3] > 0)
-				{
-					if (CheckMoney(player.PlayerGold, newShop.ItemPrice[3]) == true)
-					{
-						if (player.CurrentInventoryCapacity < player.InventoryMaxCapacity)
-						{
-							player.CurrentInventoryCapacity++;
-							player.Inventory[player.CurrentInventoryCapacity] = " Скрытность";
-
-							newShop.ItemQuantity[0] = newShop.ItemQuantity[0] - 1;
-
-							cout << "\n Товар куплен."; 
-							Sleep(2000);
-						}
-						else 
-						{
-							cout << " Недостаточно места в инвентаре."; 
-							Sleep(2000);
-						}
-					}
-					else 
-					{
-						cout << " Недостаточно золота!"; 
-						Sleep(2000);
-					}
-				}
-				else 
-				{ 
-					cout << " Хозяин таверны: На складке закончился этот товар, приходи позже!"; 
-					Sleep(2000); 
-				}
-			} 
-			break;
-			case 5: 
-			{
-				if (newShop.ItemQuantity[4] > 0)
-				{
-					if (CheckMoney(player.PlayerGold, newShop.ItemPrice[4]) == true)
-					{
-						if (player.CurrentInventoryCapacity < player.InventoryMaxCapacity)
-						{
-							player.CurrentInventoryCapacity++;
-							player.Inventory[player.CurrentInventoryCapacity] = " Броня";
-
-							newShop.ItemQuantity[0] = newShop.ItemQuantity[0] - 1;
-
-							cout << "\n Товар куплен."; 
-							Sleep(2000);
-						}
-						else 
-						{
-							cout << " Недостаточно места в инвентаре."; 
-							Sleep(2000);
-						}
-					}
-					else 
-					{
-						cout << " Недостаточно золота!"; 
-						Sleep(2000);
-					}
-				}
-				else 
-				{ 
-					cout << " Хозяин таверны: На складке закончился этот товар, приходи позже!"; 
-					Sleep(2000); 
-				}
-			} 
-			break;
-			case 6: 
-			{ 
-				Tavern(player, newUnit, newSquad, newShop);
-				isBuying = false;
-			} 
-			break;
-			}
-		}
-	} 
-	break;
-	}
-}
-
-void BuyMercenaries(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
-{
-	bool isBuying = true;
-	string naem[3] = { "Солер", "Логан", "Григгс" };
-
-	while (isBuying == true)
+	while (true)
 	{
 		system("cls");
-
-		for (int i = 0; i < 3; i++) 
-		{
-			if (naem[i] != "ПРОДАНО") 
-			{
-				cout << " " << naem[i];
-				if (naem[i] == "Солер") 
-				{ 
-					cout << "- 1000 золота\n"; 
-				}
-				else if (naem[i] == "Логан") 
-				{ 
-					cout << "- 2000 золота\n"; 
-				}
-				else if (naem[i] == "Григгс") 
-				{ 
-					cout << "- 5000 золота\n"; 
-				}
-			}
-		}
-
-		cout << " \n";
-
-		cout << " 4. Выход\n";
-
-		cout << " Выбор: ";
-		int Choice = 0;
-		cin >> Choice;
-
-		switch (Choice) 
+		cout << "\n\t<-- Главное Меню -->\n";
+		cout << "\n " << player.Name << ", выберите действие: \n";
+		cout << " 1. Посетить таверну.\n";
+		cout << " 2. Исследовать подземелье.\n";
+		cout << " 3. Характеристики героя\n";
+		cout << " 4. Армия героя.\n";
+		switch (ChoiceCheck(4))
 		{
 		case 1:
+			Tavern(player, сompanion, shop);
+			break;
+		case 2:
+			Dungeon(player, сompanion);
+			break;
+		case 3:
+			HeroStats(player);
+			break;
+		case 4:
+			HeroArmy(player, сompanion);
+			break;
+		}
+	}
+}
+void Tavern(Player& player, Companion& companion, Shop& shop)
+{
+	while (true)
+	{
+		system("cls");
+		cout << "\n\t<-- Таверна -->\n";
+		cout << " Хозяин таверны: Добро пожаловать в мою таверну, герой! Здесь для тебя найдется кров, еда и снаряжение.\n\n";
+		cout << " 1. Пополнить снаряжение.\n";
+		cout << " 2. Нанять людей.\n";
+		cout << " 3. Отдохнуть. Полностью восстанавливает здоровье и ману.\n";
+		cout << " 4. Вернуться в главное меню\n";
+		switch (ChoiceCheck(4))
 		{
-			if (naem[0] != "ПРОДАНО" && CheckMoney(player.PlayerGold, 1000) == true)
+		case 1: BuyItems(player, shop);
+			break;
+		case 2:	BuyMercenaries(player, companion, shop);
+			break;
+		case 3: RestInTavern(player, companion);
+			break;
+		case 4: return; break;
+		}
+	}
+}
+void BuyItems(Player& player, Shop& shop)
+{
+	system("cls");
+	cout << "\n\t<-- Покупка/Продажа Снаряжения -->\n";
+	cout << " 1. Купить снаряжение.\n";
+	cout << " 2. Продать снаряжение. \n";
+	bool isBuying = true;
+	switch (ChoiceCheck(2))
+	{
+	case 1:
+		system("cls");
+		cout << "\n Лавочник: Здравствуйте и добро пожаловать.\n";
+		while (true)
+		{
+			cout << "\n\t<-- Лавка магических предметов -->\n";
+			cout << " Лавочник: Вот, наш ассортимент:\n";
+			for (int i = 0; i < 5; i++)
 			{
-				cout << " Вы нанимаете Солерая за 1000 золота.";
-				player.PlayerGold = player.PlayerGold - 1000;
-				naem[0] = "ПРОДАНО";
-
-				newUnit.UnitName[2] = "Солер";
-				newUnit.UnitTotalHP[2] = 200;
-				newUnit.UntiDamage[2] = 20.0;
-				newUnit.UntiHP[2] = 200;
-				newUnit.UnitClass[2] = "Бандит";
-
-				newSquad.SquadQuantity = newSquad.SquadQuantity + 1;
-				newSquad.SquadTotalNumber = newSquad.SquadTotalNumber + 1;
-				newSquad.SquadNames[2] = "Солер";
+				cout << " " << to_string(i) + ".  Товар: " << shop.Items.at(i).Name
+					<< " | Количество: " << shop.Items.at(i).Quantity
+					<< " | Цена: " << shop.Items.at(i).Price << "\n";
 			}
-			else 
+			cout << "\n 6. Выход";
+
+			cout << "\n Лавочник: Желаете что-нибудь прикупить?";
+			int Choice = ChoiceCheck(6);
+			if (Choice == 6) {
+				cout << "\n Лавочник: До свидания, заходите ещё!";
+				break;
+			}
+
+			if (shop.Items.at(Choice - 1).Quantity != 0)
 			{
-				cout << " Недостаточно золота или наёмник уже нанят."; 
-				Sleep(3000);
-				Tavern(player, newUnit, newSquad, newShop);
+				if (CheckMoney(player.Gold, shop.Items.at(Choice - 1).Price))
+				{
+					if (player.Inventory.size() != player.InventoryMaxCapacity)
+					{
+						shop.Items.at(Choice - 1).Quantity--;
+						bool alreadyHaveChosenItem = false;
+						int itemSlot = 0;
+						for (int i = 0; i < player.Inventory.size(); i++)
+							if (player.Inventory.at(i).Name == shop.Items.at(Choice - 1).Name)
+							{
+								alreadyHaveChosenItem = true;
+								itemSlot = i;
+								break;
+							}
+
+						if (alreadyHaveChosenItem)
+							player.Inventory.at(itemSlot).Quantity++;
+						else
+						{
+							player.Inventory.push_back(shop.Items.at(Choice - 1));
+							player.Inventory.back().Quantity = 1;
+							player.Inventory.back().Price /= 2;
+						}
+						cout << "\n Лавочник: Спасибо за покупку!";
+					}
+					else cout << "\n Лавочник: Ой-ёй, кажется ваш инвентарь полон! Вы не сможете больше унести";
+				}
+				else cout << "\n Лавочник: Извините, я не могу дать вам в долг. Возвращайтесь, когда станете чуточку побогаче.";
+			}
+			else cout << "\n Лавочник: Извините, этот предмет раскуплен, выберите другой.";
+		}
+		cout << " Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
+		GetKey();
+		break;
+
+
+	case 2:
+		system("cls");
+		cout << "\n\t <-- Скупщик мусора -->\n";
+		cout << " Скупщик: Здравствуйте. Я - скупщик всего мусора, что вы мне принесёте. Я готов купить что угодно.";
+		Sleep(1000);
+		if (player.Inventory->empty())
+			cout << "\n Скупщик: ... Вы пришли с пустыми руками? Серьезно? Проваливайте отсюда.";
+		else
+		{
+			while (true)
+			{
+
+				cout << "\n Скупщик: Ну-с, посмотрим, что у вас есть...\n";
+				for (int i = 0; i < player.Inventory->size(); i++)
+					cout << " " << to_string(i + 1) << ". " << player.Inventory->at(i).Name << " | Количество: " << player.Inventory->at(i).Quantity << endl;
+				cout << player.Inventory->size() + 1 << ". Выход";
+
+				cout << "\n <-- Выберите предмет на продажу -->";
+				int Choice = ChoiceCheck(player.Inventory->size() + 1);
+				if (Choice == player.Inventory->size() + 1)
+				{
+					cout << "\n Скупщик: Прощайте.";
+					break;
+				}
+				cout << "\n Скупщик: Я куплю " << player.Inventory->at(Choice - 1).Name << " за " << player.Inventory->at(Choice - 1).Price << " золотых. Вы согласны?";
+				cout << "\n 1. Да";
+				cout << "\n 2. Нет";
+
+				if (ChoiceCheck(2) == 1)
+				{
+					cout << "\n Скупщик: Отлично! Это пополнит мою коллекцию.";
+					player.Gold += player.Inventory->at(Choice - 1).Price;
+					player.Inventory->at(Choice - 1).Quantity--;
+					if (player.Inventory->at(Choice - 1).Quantity == 0)
+						player.Inventory->erase(player.Inventory->begin() + Choice - 1);
+				}
+				else cout << "\n Скупщик: Как скажете.";
+
+
+				if (player.Inventory->empty()) {
+					cout << "\n Скупщик: Кажется, у вас закончился мусор. Можете спокойно валить отсюда и не возвращаться, пока у вас не появится новый.";
+					break;
+				}
+			}
+
+			cout << " Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
+			GetKey();
+			break;
+		}
+	}
+}
+void BuyMercenaries(Player& player, Companion& companion, Shop& shop)
+{
+	while (true)
+	{
+		system("cls");
+		cout << "\n\t<-- Найм компаньонов -->\n";
+		cout << " Главарь наёмников: Приветствую и бла-бла. Выбирай бойца.";
+		for (int i = 0; i < 5; i++)
+			cout << " " << to_string(i + 1) << ". " << shop.Companions[i].Name << " | Класс: " << shop.Companions[i].Class
+			<< " | Здоровье: " << shop.Companions[i].TotalHP << " | Защита: " << shop.Companions[i].Defence
+			<< " | Урон: " << shop.Companions[i].Damage << " | Количество атак: " << shop.Companions[i].MaxAttackCount << "\n";
+		cout << "\n 6. Выход";
+		cout << "\n Выбор\n";
+
+		int Choice = ChoiceCheck(6);
+		if (Choice == 6) return;
+
+		if (!shop.Companions[Choice - 1].isSold)
+			if (player.haveCompanion)
+			{
+				cout << "\n У вас уже есть компаньон " << companion.Name << ":\n";
+				cout << " Класс: " << companion.Class << " | Здоровье: " << companion.HP << " / " << companion.TotalHP << " | Защита: " << companion.Defence
+					<< " | Урон: " << companion.Damage << " | Количество атак: " << companion.CurAttackCount << " / " << companion.MaxAttackCount;
+				cout << "\n\n Хотите его заменить?";
+				cout << "\n 1. Да";
+				cout << "\n 2. Нет";
+				if (ChoiceCheck(2) == 1)
+				{
+					companion = shop.Companions[Choice - 1];
+					shop.Companions[Choice - 1].isSold = true;
+					shop.Companions[Choice - 1].Name += " (ПРОДАН)";
+					return;
+				}
+			}
+			else
+			{
+				cout << "\n Вы наняли компаньона " << companion.Name;
+				companion = shop.Companions[Choice - 1];
+				shop.Companions[Choice - 1].isSold = true;
+				shop.Companions[Choice - 1].Name += " (ПРОДАН)";
+				return;
+			}
+		else cout << "\n Этот наёмник уже был нанят.";
+	}
+}
+void RestInTavern(Player& player, Companion& companion)
+{
+	system("cls");
+	cout << "\n\t<-- Отдых в таверне -->\n";
+	int restPrice = (player.TotalHP - player.HP) + (player.MaxMana - player.Mana) +
+		(companion.TotalHP - companion.HP) + (companion.MaxAttackCount - companion.CurAttackCount) * 5;
+	if (restPrice != 0) {
+		if (CheckMoney(player.Gold, restPrice))
+		{
+			player.Gold = player.Gold - restPrice;
+			player.HP = player.TotalHP;
+			player.Mana = player.MaxMana;
+			companion.HP = companion.TotalHP;
+			companion.CurAttackCount = companion.MaxAttackCount;
+			cout << " Вы отдохнули. Ваши здоровье и мана полностью восстановлены.";
+			cout << "\n Ваш компаньон отдохнул. Его здоровье и силы полностью восстановлены.";
+		}
+		else cout << " Хозяин таверны: Возвращайтесь, когда будет золото, уважаемый!";
+	}
+	else cout << " Вы не нуждаетесь в отдыхе... ";
+	cout << endl;
+	cout << endl;
+	cout << " Нажмите любую кнопку, чтобы вернуться в главное меню" << endl;
+	GetKey();
+}
+void Dungeon(Player& player, Companion& companion)
+{
+	system("cls");
+	int floor = 1;
+	cout << "\n\t<-- Поход в Подземелье -->\n";
+	cout << " Выберите, куда идти:\n";
+	cout << " 1. Лес Павших Гигантов (легко, 5 этажей) \n";
+	cout << " 2. Город Нежити (средне, 12 этажей) \n";
+	cout << " 3. Цитадель Фаррона (тяжело, 25 этажей) \n" << endl;
+	NewDungeon myDungeon;
+	switch (ChoiceCheck(3)) {
+	case 1:
+		myDungeon.DungDifficulty = 0.75;
+		myDungeon.DungFloorsCount = 5;
+		myDungeon.DungType = "Лес Павших Гигантов";
+		myDungeon.isDungBoss = 0.0;
+		break;
+	case 2:
+		myDungeon.DungDifficulty = 1.5;
+		myDungeon.DungFloorsCount = 12;
+		myDungeon.DungType = "Город Нежити";
+		myDungeon.isDungBoss = 0.5;
+		break;
+	case 3:
+		myDungeon.DungDifficulty = 3.0;
+		myDungeon.DungFloorsCount = 25;
+		myDungeon.DungType = "Цитадель Фаррона";
+		myDungeon.isDungBoss = 1.0;
+		break;
+	}
+
+	for (int i = 1; i <= myDungeon.DungFloorsCount; i++) {
+		myDungeon.DungCurFloor = i;
+		if (myDungeon.DungCurFloor == myDungeon.DungFloorsCount)
+			if ((double)Random(0, 11) / 10.0 <= myDungeon.DungDifficulty)
+				ChooseRandomBoss(player, companion, myDungeon);
+		ChooseRandomFloor(player, companion, myDungeon);
+	}
+
+	system("cls");
+	cout << "\n Локация исследована. Вы принимаете решение вернуться в Храм Огня...";
+	cout << " Нажмите любую кнопку, чтобы вернуться в главное меню" << endl;
+	GetKey();
+}
+void ChooseRandomFloor(Player& player, Companion& companion, NewDungeon& dungeon) 
+{
+	Reward BattleReward;
+	//Динамический массив врагов
+	vector <Enemy> Enemies;
+	int r;
+	//UI
+	{
+		system("cls");
+		cout << "\n Локация " << dungeon.DungType << " | Этаж " << dungeon.DungCurFloor << " из " << dungeon.DungFloorsCount << endl;
+
+		cout << "\n " << player.Name << " характеристики: \n";
+		cout << " Класс: " << player.Class << "\n";
+		cout << " Уровень: " << player.Level << "\n";
+		cout << " Опыт: " << player.Experience << " / " << player.MaxExp << "\n";
+		cout << " Здоровье: " << player.HP << " / " << player.TotalHP << "\n";
+		cout << " Средний урон: " << (player.Damage + player.MinDamage) / 2.0 << "\n";
+		cout << " Защита: " << player.Defence << "\n";
+		cout << " Магическая сила: " << player.MagicPower << "\n";
+		cout << " Мана: " << player.Mana << " / " << player.MaxMana << "\n";
+		cout << " Золото: " << player.Gold << "\n";
+		cout << " \n\n";
+	}
+
+	switch (Random(0, 10))
+	{
+	default:
+	case 0:
+	{
+		cout << " Вы идёте по тропе, как вдруг на пути замечаете полого, целящегося в вас из арбалета. Ваши действия?\n";
+		cout << " 1. Напасть на него\n";
+		cout << " 2. Уклониться от стрелы\n";
+		cout << " 3. Парировать стрелу\n";
+		cout << " 4. Ничего не делать\n";
+		Enemies.push_back(Enemy("Полый солдат", 0, 60 * dungeon.DungDifficulty, 33 * dungeon.DungDifficulty, 3));
+		switch (ChoiceCheck(4)) {
+		case 1:
+		{
+			player.HP -= Random(Enemies.front().Damage - 5, Enemies.front().Damage + 5);
+			Enemies.front().HP -= Random(player.MinDamage, player.Damage);
+
+			cout << "\n Полый попадает в вас стрелой (ваше здоровье: " << player.HP << "), но платится за это своей кровью.";
+			if (Enemies.front().HP <= 0) {
+				Reward rew = CalculateReward(dungeon.DungDifficulty, Enemies);
+				cout << "\n Полый убит. Получено опыта: " << rew.Experience;
+				cout << "\n Вы обыскиваете останки и находите немного золота: " << rew.Gold;
+				GiveReward(player, rew);
+				vector<Enemy>().swap(Enemies);
+			}
+			else {
+				cout << "\n Вы раните полого, оставляя ему " << Enemies.front().HP << " здоровья.\n";
 			}
 		}
 		break;
 		case 2:
 		{
-			if (naem[1] != "ПРОДАНО" && CheckMoney(player.PlayerGold, 1000) == true)
+			int difference = player.InventoryMaxCapacity - player.Inventory.size();
+			double hardness = 10 * dungeon.DungDifficulty;
+			if (difference > hardness)
+				cout << "\n Вы успешно уклонились от стрелы!";
+			else
 			{
-				cout << " Вы нанимаете Логана за 2000 золота.";
-				player.PlayerGold = player.PlayerGold - 2000;
-				naem[1] = "ПРОДАНО";
-
-				newUnit.UnitName[3] = "Логан";
-				newUnit.UnitTotalHP[3] = 200;
-				newUnit.UntiDamage[3] = 20.0;
-				newUnit.UntiHP[3] = 300;
-				newUnit.UnitClass[3] = "Убийца";
-
-				newSquad.SquadQuantity = newSquad.SquadQuantity + 1;
-				newSquad.SquadTotalNumber = newSquad.SquadTotalNumber + 1;
-				newSquad.SquadNames[3] = "Логан";
+				player.HP -= Random(Enemies.front().Damage - 10, Enemies.front().Damage);
+				cout << "\n Что-то затрудняет ваше передвижение - вы не смогли уклониться.";
+				cout << "\n Полый ранит вас стрелой и оставляет " << player.HP << " здоровья.\n";
 			}
-			else 
-			{
-				cout << " Недостаточно золота или наёмник уже нанят."; 
-				Sleep(3000);  
-				Tavern(player, newUnit, newSquad, newShop);
-			}
-		} 
+		}
 		break;
 		case 3:
 		{
-			if (naem[2] != "ПРОДАНО" && CheckMoney(player.PlayerGold, 1000) == true) {
-				cout << " Вы нанимаете Григгса за 5000 золота.";
-				player.PlayerGold = player.PlayerGold - 5000;
-				naem[2] = "ПРОДАНО";
-
-				newUnit.UnitName[4] = "Григгс";
-				newUnit.UnitTotalHP[4] = 200;
-				newUnit.UntiDamage[4] = 50.0;
-				newUnit.UntiHP[4] = 200;
-				newUnit.UnitClass[4] = "Маг";
-
-				newSquad.SquadQuantity = newSquad.SquadQuantity + 1;
-				newSquad.SquadTotalNumber = newSquad.SquadTotalNumber + 1;
-				newSquad.SquadNames[4] = "Григгс";
+			double hardness = 100 * dungeon.DungDifficulty;
+			if (player.Defence > hardness)
+				cout << "\n Вы успешно отразили стрелу!";
+			else
+			{
+				player.HP -= DecreaseDmgByDef(Enemies.front().Damage, player.Defence);
+				cout << "\n Ваша защита оставляет желать лучшего - вы не смогли защититься.";
+				cout << "\n Полый ранит вас стрелой и оставляет " << player.HP << " здоровья.\n";
 			}
-			else 
-			{ 
-				cout << " Недостаточно золота или наёмник уже нанят."; 
-				Sleep(3000);  
-				Tavern(player, newUnit, newSquad, newShop); }
-		} 
+		}
 		break;
 		case 4:
 		{
-			isBuying = false; MainMenu(player, newUnit, newSquad, newShop);
-		} 
+			int dmg = Enemies.front().Damage * 1.5;
+			player.HP -= dmg;
+			CheckDeath(player);
+			cout << "\n Стоящая на месте мишень - отличная цель для стрельбы!!!";
+			cout << "\n Полый стреляет по незащищенной части вашего тела и ранит вас на " << dmg;
+			cout << ".\n Ваше здоровье: " << player.HP;
+		}
 		break;
 		}
+		break;
 	}
-}
-
-void Dungeon(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
-{
-	system("cls");
-
-	switch (Random(1, 3)) 
-	{
 	case 1:
 	{
-		cout << " С потолка свисает непонятный сгусток слизи. Такое ощущение, что он двигается. Ваши действия?\n";
-		cout << " 1. Атаковать\n";
-		cout << " 2. Обойти\n";
+		cout << "\n Вы исследуете глубины и находите поселение полых крестьян. Они вас не видят.";
+		cout << "\n Один из полых проходит буквально рядом с вами. Нужно что-то делать.";
+		cout << "\n 1.Ударить полого рядом с собой";
+		cout << "\n 2.Тихо уйти";
+		cout << "\n 3.Подкрасться к полому сзади и попытаться его убить";
+		cout << "\n 4.Выжидать";
 
-		cout << " \n";
 
-		switch (ChoiceCheck(2))
+		for (int i = 0; i < 5; i++)
+			Enemies.push_back(Enemy(" Полый крестьянин [" + to_string(i + 1) + "]", 0, 80 * dungeon.DungDifficulty, 17 * dungeon.DungDifficulty, 2));
+
+		GetKey();
+		switch (ChoiceCheck(4)) {
+		case 1:
 		{
-		case 1: 
-		{
-			player.PlayerHP = player.PlayerHP - Random(5, 10);
-			cout << "\n Слизь срывается с потолка и падает прямо на вас!. Она ранит вас и оставляет вам: " << player.PlayerHP << ".\n";
-		} 
+			cout << "\n Вы тихо подкрадываетесь к полому и бьёте его в спину";
+			Enemies.at(Random(0, 5)).HP /= 2;
+		}
 		break;
 		case 2:
 		{
-			cout << "\n Вы обошли неизвестное существо.";
-		} 
+			cout << "\n Вы пытаетесь тихо уйти, но один из полых замечает вас.";
+			cout << "\n Он атакует и...";
+			Sleep(2000);
+			if (Random(0, 100) > 30)
+			{
+				cout << " попадает.";
+				player.HP -= Enemies.front().Damage;
+				cout << "\n Вам нанесли " << Enemies.front().Damage << " урона. Текущее здоровье: " << player.HP;
+				CheckDeath(player);
+			}
+			else cout << " промахивается.";
+		}
+		break;
+		case 3:
+		{
+			if (Random(0, 100) > 85) {
+				cout << "\n Вы подкрадываетесь к полому и наносите ему сокрушающий удар, моментально убивая его.";
+				int i = Random(0, 5);
+				Enemies.at(i).Name += " (МЁРТВ)";
+				Enemies.at(i).isDead = true;
+			}
+			else cout << "\n Вас заметили.";
+		}
+		break;
+		case 4:
+		{
+			cout << "\n Вы слишком долго выжидали. Вас заметили.";
+		}
 		break;
 		}
+		break;
+	}
+	case 2:
+	{
+		Enemies.push_back(Enemy("Демон-ворона", 2, Random(80, 100) * dungeon.DungDifficulty, Random(20, 41) * dungeon.DungDifficulty, 4));
+		int dmg = Enemies.front().Damage * 2;
+		player.HP -= dmg;
+		cout << "\n Посещая Нарисованный Мир Ариамиса вам встречается высокая полуженщина-полуворона.";
+		cout << "\n Демон-ворона высоко взлетает, разгоняется и пикирует, нанося вам урон (" << dmg << "). Ваше здоровье: " << player.HP;
+		CheckDeath(player);
+		break;
+	}
+	case 3:
+	{
 
-		cout << "\n Вы исследуете глубины и находите поселение полых. Начинается бой..."; 
-		Sleep(3000);
+		for (int i = 0; i < 7; i++)
+			Enemies.push_back(Enemy(" Крыса [" + to_string(i + 1) + "]", 7, 50 * dungeon.DungDifficulty, 14 * dungeon.DungDifficulty, 2));
 
-		Enemy newEnemy;
-		newEnemy.LastQuantity = 5;
-		newEnemy.EnemyQuantity = 5;
-		int k = 1;
+		cout << "\n Вы приходите в Глубины, а точнее в нижние части стоков. На вас бежит стая гигантских Крыс.";
+		cout << "\n Ваши действия?";
+		cout << "\n 1. Убить одну крысу";
+		cout << "\n 2. Напасть на несколько крыс";
+		switch (ChoiceCheck(2))
+		{
+		case 1:
+			cout << "\n Метким ударом вы убиваете одну из крыс, набрасывающихся на вас.";
+			r = Random(0, 7);
+			Enemies.at(r).HP = 0;
+			Enemies.at(r).isDead = true;
+			break;
+		case 2:
+			r = Random(0, 4);
+			cout << "\n Вы раните трёх крыс на " << player.Damage;
+			for (int i = r; i < r + 3; i++)
+				Enemies.at(i).HP -= player.Damage;
+			break;
+		}
+		break;
+	}
+	case 4:
+	{
+		cout << "\n Вы проходите через врата и оказываетесь в Крепости Сена.";
+		cout << "\n Вдалеке вы можете разглядеть двух змеев, шипящих о чём-то своём. Кажется, они вас не видят.";
+		Enemies.push_back(Enemy("Змей-Солдат [1]", 2, Random(40, 55) * dungeon.DungDifficulty, Random(20, 30) * dungeon.DungDifficulty, 2));
+		Enemies.push_back(Enemy("Змей-Маг", 2, Random(30, 36) * dungeon.DungDifficulty, Random(50, 60) * dungeon.DungDifficulty, 3));
+		Enemies.push_back(Enemy("Змей-Солдат [2]", 2, Random(40, 55) * dungeon.DungDifficulty, Random(20, 30) * dungeon.DungDifficulty, 2));
 
-		for (int i = 0; i < newEnemy.EnemyQuantity; i++) {
+		if (player.Defence > 100 * dungeon.DungDifficulty)
+			cout << "\n Вы замечаете подкрадывающегося к вам Змея-Солдата.\n Он громко шипит, чем привлекает внимание сородичей.";
+		else {
+			int dmg = DecreaseDmgByDef(Enemies.front().Damage - 5, player.Defence);
+			cout << "\n К вас подкрадывается другой Змей и бьёт огромным мечом наотмашь. Вы ранены на " << dmg << ".";
+			player.HP -= dmg;
+			cout << "\n Ваше здоровье: " << player.HP;
+			cout << "\n Те два змея слышат шум и обращают внимание на вас. Похоже, они настроены агрессивно.";
+		}
+		break;
+	}
+	case 5:
+	{
+		cout << "\n Вы спускаетесь в катакомбы, кишащие скелетами. Без лишних слов вы беретесь за оружие и начинаете сражаться с нежитью.";
+		for (int i = 0; i < 12; i++)
+			Enemies.push_back(Enemy("Скелет [" + to_string(i + 1) + "]", 3, 20 * dungeon.DungDifficulty, 8 * dungeon.DungDifficulty, 1));
+		break;
+	}
+	case 6:
+	{
+		cout << "\n Вы приходите к Кристальному Гроту. Здесь ходит пара Кристальных Големов.";
+		cout << "\n Рядом с вами проходит тропинка, которая позволит избежать боя с одним из Големов. Хотите по ней пройти?";
+		cout << "\n 1. Да \n 2. Нет\n";
+		if (ChoiceCheck(2) == 1)
+			Enemies.push_back(Enemy("Кристальный Голем", 6, 220 * dungeon.DungDifficulty, Random(20, 30) * dungeon.DungDifficulty, 5));
+		else
+			for (int i = 0; i < 2; i++)
+				Enemies.push_back(Enemy("Кристальный Голем [" + to_string(i + 1) + "]", 6, Random(160, 190) * dungeon.DungDifficulty, 25 * dungeon.DungDifficulty, 6));
+		break;
+	}
+	case 7:
+	{
+		player.HP -= player.TotalHP / 12;
+		if (player.HP <= 0)
+			player.HP = 1;
+		cout << "\n В ходе скитаний вас заносит в Чумной Город. Здешняя атмосфера негативно сказывается на вашем здоровье (здоровье: " << player.HP << ").";
+		cout << "\n При проходе по доскам на вас нападает Вурдалак и Снайпер с духовой трубкой.";
 
-			string names = " Полый(" + std::to_string(k) + ")";
-			newEnemy.EnemyName[i] = names;
-			newEnemy.EnemyClass[i] = "Человек";
-			newEnemy.EnemyHP[i] = 20.0;
-			newEnemy.EnemyDamage[i] = 7.0;
-			k++;
+		Enemies.push_back(Enemy("Вурдалак", 3, Random(80, 105) * dungeon.DungDifficulty, Random(15, 20) * dungeon.DungDifficulty, 3));
+		Enemies.push_back(Enemy("Снайпер с духовой трубкой", 0, Random(20, 45) * dungeon.DungDifficulty, 60 * dungeon.DungDifficulty, 4));
+		break;
+	}
+	case 8:
+	{
+		cout << "\n Вы посещаете руины Хейда. Море здесь поглотило некогда возвышавшийся здесь замок с высокими башнями.";
+		cout << "\n Ваш путь лежит к Огненной Башне Хейда, судя по всему являвшаяся когда-то маяком.";
+		cout << "\n Пройти к ней вам мешают три Старых рыцаря, вооруженных мечом и щитом. В стороне от пути сидит Рыцарь Хейда и, кажется, дремлет.";
+		cout << "\n Что вы хотите сделать?";
+		cout << "\n 1. Избавиться от Рыцаря Хейда";
+		cout << "\n 2. Проигнорировать Рыцаря Хейда и напасть сразу на Старых Рыцарей";
+		if (ChoiceCheck(2) == 1) {
+			Enemies.push_back(Enemy("Рыцарь Хейда", 1, Random(60, 75) * dungeon.DungDifficulty, 50 * dungeon.DungDifficulty, 3));
+
+			cout << "\n\n Вы заносите оружие над Рыцарем Хейда, но тот уворачивается от удара и контратакует.";
+			int dmg = DecreaseDmgByDef(Enemies.front().Damage, player.Defence);
+			player.HP -= dmg;
+			cout << "\n Не ожидав такого отпора, вы пропускаете один удар (" << dmg << " урона)...";
+			Sleep(1000);
+			CheckDeath(player);
+			cout << "\n Рыцарь Хейда не так прост, как казался. Он методичными нападениями и уклонениями привёл вас прямиком к Старым Рыцарям.";
+			for (int i = 1; i < 4; i++) {
+				Enemies.push_back(Enemy("Старый Рыцарь [" + to_string(i + 1) + "]", 6, Random(90, 105) * dungeon.DungDifficulty, Random(15, 20) * dungeon.DungDifficulty, 2));
+				Sleep(100);
+			}
+			if (Random(0, 100) > 70) {
+				cout << "\n Вы ловите момент и раните Рыцаря Хейда.";
+				Enemies.front().HP -= player.Damage;
+				Sleep(500);
+				cout << "\n За это один из рыцарей, целясь в вас, делает резкий выпад копьём.";
+				dmg = DecreaseDmgByDef(Enemies.at(1).Damage, player.Defence);
+				cout << "\n Вам нанесли: " << dmg << ". Ваше здоровье: " << player.HP;
+				CheckDeath(player);
+			}
+		}
+		else {
+			cout << "\n\n Вы проходите мимо Рыцаря Хейда. И правильно, потому что вы замечаете, что он провожает вас взлядом.";
+			cout << "\n Поняв, что вы направляетесь к Старым Рыцарям он хмыкает и прекращает обращать на вас внимание.";
+			cout << "\n Зато Старые Рыцари уже увидели вас и приготовились к битве.";
+			for (int i = 0; i < 3; i++)
+				Enemies.push_back(Enemy("Старый Рыцарь [" + to_string(i + 1) + "]", 6, Random(90, 105) * dungeon.DungDifficulty, Random(15, 20) * dungeon.DungDifficulty, 2));
 		}
 
-		Combat(newSquad, newUnit, newEnemy, player);
-	} 
+		break;
+	}
+	case 9:
+	{
+		cout << "\n В своих странствиях вы посещаете Катакомбы. У моста с шипами вы встречаете человека, представившегося \"Лоскутиком\".";
+		cout << "\n Лоскутик: Приветствую! Похоже, ты вполне в своем уме! Что ты делаешь в Катакомбах? Ты клирик или что-то в этом духе?";
+		cout << "\n 1. Да";
+		cout << "\n 2. Нет";
+		Enemies.push_back(Enemy("Верный Лоскутик", 1, Random(120, 130)* dungeon.DungDifficulty, 50 * dungeon.DungDifficulty, 6));
+			int answer = (ChoiceCheck(2));
+		if (answer == 1)
+			cout << "\n Лоскутик: Да, так мне и представлялось. Удачи в твоем паломничестве или миссии - и вообще во всех твоих делах. Это опасное место, так что смотри под ноги. Хе-хе-хе.";
+		else
+			cout << "\n Лоскутик: Нет? Пожалуй, это странно. О, я знаю, в чем дело. Тебе нужны амулеты, правильно? Ну, что бы там ни было... Это опасное место, так что смотри под ноги. Хе-хе-хе.";
+		cout << "\n Несмотря на это, Лоскутик рушит мост, по которому вы идёте. Вы решаете встретиться с ним и поговорить ещё раз.";
+		if (answer == 1)
+			cout << "\n Вы находите Лоскутика. Он ехидно ухмыляется и поднимает своё копьё.\n Лоскутик : Вот теперь - то поговорим, клирик.";
+		else
+		{
+			vector<Enemy>().swap(Enemies);
+			cout << "\n Лоскутик: Ай, ой! Так, и как твои дела? Видишь ли, я дернул тот рычаг... Надеюсь, тебе это не доставило лишних неприятностей?";
+			cout << "\n 1. Да";
+			cout << "\n 2. Нет";
+			if (ChoiceCheck(2) == 1) {
+				cout << "\n Лоскутик: Точно?! Да, неловко вышло. Мне очень жаль, правда! "
+					<< "\n Лоскутик: Но погоди, получается, что это не я тебя сюда уронил? Надо было раньше сказать! Хорошо то, что хорошо кончается! "
+					<< "\n Лоскутик: Все делают ошибки. И я не исключение! Я, Верный Лоскутик, единственный и неповторимый! Я знаю! Это должно сработать. "
+					<< "\n Лоскутик: Мы на одной стороне! Изгнанные мертвецы! По-моему, дивно. Хе-хе-хе.";
+				cout << "\n С Этими словами Лоскутик передаёт вам 100 золотых.";
+				player.Gold += 100;
+			}
+			else {
+				cout << "\n Лоскутик: Неужели? Понятно! Значит, все в порядке? Я, Верный Лоскутик, единственный и неповторимый!";
+				cout << "\n Лоскутик: Ты и я, просто изгнанные мертвецы, правда, дружище?";
+			}
+			Sleep(5000);
+			goto label;
+		}
+	}
+	}
+	if (!Enemies.empty()) {
+		cout << "\n Начинается бой...";
+		Sleep(3000);
+		Combat(player, companion, Enemies, dungeon);
+		cout << "\n Битва завершена. Вот ваша награда:\n";
+		BattleReward = CalculateReward(dungeon.DungDifficulty, Enemies);
+		cout << " Опыт: " << BattleReward.Experience << "\t Золото: " << BattleReward.Gold;
+		GiveReward(player, BattleReward);
+	}
+label:
+	cout << "\n\n Нажмите любую клавишу, чтобы перейти на следующий этаж. ";
+	GetKey();
+}
+void ChooseRandomBoss(Player& player, Companion& companion, NewDungeon& dungeon)
+{
+	DungeonBoss boss = DungeonBoss("КАК????", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	Reward BattleReward;
+	switch (Random(0, 5)) {
+	case 0:
+	{
+		cout << "\n Вы исследуете башни Города Нежити. На одной из стен к вам с башни напротив спрыгивает Демон-Телец.";
+		cout << "\n Демон встаёт на четыре лапы и мчится на вас, стремясь протаранить.";
+		cout << "\n Ваши действия?";
+		cout << "\n 1. Встретить демона атакой";
+		cout << "\n 2. Попытаться уклониться";
+		boss = DungeonBoss("Демон-Телец", 4, 
+			Random(300, 500) * dungeon.DungDifficulty, 
+			Random(40, 90) * dungeon.DungDifficulty, 
+			70, 5, Random(100, 300) * dungeon.DungDifficulty, 
+			100 * dungeon.DungDifficulty, 0, 0, 3);
+		Sleep(13);
+
+		int dmg = DecreaseDmgByDef(boss.Damage * 1.5, player.Defence);
+		switch (ChoiceCheck(2))
+		{
+		case 1:
+			cout << "\n Вы успеваете ранить Демона-Тельца перед тем как он протаранит вас и кинет об башню.\n";
+			player.HP -= dmg;
+			player.HP -= 10;
+			cout << "\n Демон-Телец нанёс вам " << dmg + 10 << " урона. Ваше здоровье: " << player.HP;
+			dmg = DecreaseDmgByDef(player.MinDamage, boss.Defence);
+			boss.HP -= dmg;
+			cout << "\n Вы нанесли Демону-Тельцу " << dmg << " урона. Здоровье Демона-Тельца: " << boss.HP;
+			CheckDeath(boss);
+			break;
+		case 2:
+			if (Random(0, 100) > 80)
+			{
+				cout << "\n Вы успешно уклонились от Демона-Тельца. Он врезается в башню и получает 50 урона.";
+				boss.HP -= 50;
+			}
+			else {
+				player.HP -= dmg;
+				cout << "\n Демон-Телец таранит вас. Вы получаете " << dmg << " урона. Ваше здоровье: " << player.HP;
+			}
+
+			break;
+		}
+		CheckDeath(player);
+	}
+	break;
+	case 1:
+	{
+		cout << "\n Пройдя через врата, вы попадайте в разрушенный город, известный в легендах как Изалит.  Путь в город преграждает демон Капра.";
+		cout << "\n Замечая вас, он встаёт в боевую стойку и преграждает вам путь, тогда как путь назад отрезает стена из огня. Битвы не избежать.";
+		boss = DungeonBoss("Демон Капра", 4,
+			500 * dungeon.DungDifficulty,
+			Random(10, 20) * dungeon.DungDifficulty,
+			-35, 6, Random(150, 300) * dungeon.DungDifficulty,
+			150 * dungeon.DungDifficulty, 15, 2, 3);
+	}
 	break;
 	case 2:
 	{
-		cout << "\n Вы ислледуете глубины дальше. Вы замечайте неизвестные врата, стражами врат являются демоны-тельцы. Начинается бой..."; 
-		Sleep(3000);
-
-		Enemy newEnemy;
-		newEnemy.LastQuantity = 2;
-		newEnemy.EnemyQuantity = 2;
-		int k = 1;
-
-		for (int i = 0; i < newEnemy.EnemyQuantity; i++) 
-		{
-
-			string names = " Демон-телец(" + std::to_string(k) + ")";
-			newEnemy.EnemyName[i] = names;
-			newEnemy.EnemyClass[i] = "Демон";
-			newEnemy.EnemyHP[i] = 80.0;
-			newEnemy.EnemyDamage[i] = 4.0;
-			k++;
-		}
-		Combat(newSquad, newUnit, newEnemy, player);
-	} 
+		cout << "\n Вы идёте по мосту в сторону Уезда Нежити. Вы видите вдалеке небольшие отряды полых и уже готовитесь к бою...";
+		cout << "\n Но внезапно с арки над мостом слетает Красная виверна и поливает огнём отряды полых.";
+		cout << "\n Виверна садится на середину моста и идёт по мосту спиной к вам. Не похоже, что она собирается уходить отсюда.";
+		cout << "\n Вы решаете воспользоваться моментом и атакуете виверну.";
+		boss = DungeonBoss("Красная виверна", 5,
+			430 * dungeon.DungDifficulty,
+			80 * dungeon.DungDifficulty,
+			140, 7, 100 * dungeon.DungDifficulty,
+			Random(250, 500) * dungeon.DungDifficulty, 25, 1, 4);
+		boss.HP -= (player.Damage + player.MagicPower);
+	}
 	break;
 	case 3:
 	{
-		cout << "\n Пройдя через врата, вы попадайте в разрушенный город, известный в легендах как Изалит.  Путь в город преграждают капра-демоны."
-			" Начинается бой..."; 
-		Sleep(3000);
-
-		Enemy newEnemy;
-		newEnemy.LastQuantity = 2;
-		newEnemy.EnemyQuantity = 2;
-		int k = 1;
-
-		for (int i = 0; i < newEnemy.EnemyQuantity; i++) {
-
-			string names = " Капра-демон(" + std::to_string(k) + ")";
-			newEnemy.EnemyName[i] = names;
-			newEnemy.EnemyClass[i] = "Демон";
-			newEnemy.EnemyHP[i] = 50.0;
-			newEnemy.EnemyDamage[i] = 8.0;
-			k++;
+		cout << "\n Во время посещения древних захоронений, на вас нападает Лич.";
+		boss = DungeonBoss("Лич", 3,
+			350 * dungeon.DungDifficulty,
+			40 * dungeon.DungDifficulty,
+			56, 8, Random(300, 500) * dungeon.DungDifficulty,
+			Random(250, 400)* dungeon.DungDifficulty, 5, 3, 2);
 	}
-		Combat(newSquad, newUnit, newEnemy, player);
-	} 
+	break;
+	case 4:
+	{
+		cout << "\n В Крепости Сена, в одной из башен вам встречается человек в доспехах элитного рыцаря.";
+		cout << "\n На первый взгляд кажется, что это один из немногих выживших людей, но его поведение говорит о том, что он обращён в полого и полностью выжил из ума.";
+		cout << "\n Он выглядит богатым и судя по всему принц, родом из Асторы. Вы решаете, что сможете немного заработать на его смерти.";
+		boss = DungeonBoss("Полый принц из Асторы", 2,
+			300 * dungeon.DungDifficulty,
+			120 * dungeon.DungDifficulty,
+			100, 6, Random(500, 1500) * dungeon.DungDifficulty,
+			Random(200, 450) * dungeon.DungDifficulty, 35, 4, 3);
+	}
 	break;
 	}
-
-	system("cls");
-	cout << "\n Изалит кишит полчищами демонов, захвативших город. Они слишком опасны. Вы принимаете решение вернуться в город.";
+	cout << "\n Начинается бой...";
 	Sleep(3000);
+	Combat(player, companion, boss);
 
-	MainMenu(player, newUnit, newSquad, newShop);
+	cout << "\n Битва с боссом завершена. Вот ваша награда:\n";
+	BattleReward = CalculateReward(dungeon.DungDifficulty, boss);
+	cout << " Опыт: " << BattleReward.Experience << "\t Золото: " << BattleReward.Gold;
+	GiveReward(player, BattleReward);
+	cout << "\n\n Нажмите любую клавишу, чтобы покинуть данж и вернуться в главное меню. ";
+	GetKey();
 }
-
-void HeroArmy(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
+void HeroStats(Player& player)
 {
 	system("cls");
-
-	cout << " Отряд " << player.PlayerName << ": ";
-
+	cout << "\n " << player.Name << " характеристики: \n";
+	cout << " Класс: " << player.Class << "\n";
+	cout << " Уровень: " << player.Level << "\n";
+	cout << " Опыт: " << player.Experience << " / " << player.MaxExp << "\n";
+	cout << " Здоровье: " << player.HP << " / " << player.TotalHP << "\n";
+	cout << " Средний урон: " << (player.Damage + player.MinDamage) / 2.0 << "\n";
+	cout << " Защита: " << player.Defence << "\n";
+	cout << " Магическая сила: " << player.MagicPower << "\n";
+	cout << " Мана: " << player.Mana << " / " << player.MaxMana << "\n";
+	cout << " Золото: " << player.Gold << "\n";
 	cout << " \n";
-
-	for (int i = 0; i < newSquad.SquadQuantity; i++) {
-		cout << " Имя: " << newUnit.UnitName[i] << " | Здоровье: " << newUnit.UntiHP[i] << "/" << newUnit.UnitTotalHP[i]
-			<< " | Урон: " << newUnit.UntiDamage[i] << " | Класс: " << newUnit.UnitClass[i] << "\n";
-		cout << " \n";
-	}
-
-	cout << " 1. Продолжить. \n";
-
-	cout << " Выбор: ";
-	int Choice = 0;
-	cin >> Choice;
-
-	switch (Choice) 
-	{
-	case 1: 
-	{
-		MainMenu(player, newUnit, newSquad, newShop); 
-	} 
-	break;
-	}
-}
-
-void HeroStats(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
-{
-	system("cls");
-
-	cout << " Характеристики " << player.PlayerName << ": \n";
-	cout << " Класс: " << player.PlayerClass << "\n";
-	cout << " Уровень: " << player.PlayerLevel << "\n";
-	cout << " Здоровье: " << player.PlayerHP << "\n";
-	cout << " Урон: " << player.PlayerDamage << "\n";
-	cout << " Защита: " << player.PlayerDefence << "\n";
-	cout << " Интеллект: " << player.PlayerKnowledge << "\n";
-	cout << " Магическая сила: " << player.PlayerMagicPower << "\n";
-	cout << " Мана: " << player.PlayerMana << "\n";
-	cout << " Золото: " << player.PlayerGold << "\n";
-
-	cout << " \n";
-
-	cout << " 1. Продолжить. \n";
-
-	cout << " Выбор: ";
-	int Choice = 0;
-	cin >> Choice;
-	switch (Choice) 
-	{
-	case 1: 
-	{
-		MainMenu(player, newUnit, newSquad, newShop); 
-	}
-	break;
-	}
-}
-
-void Inventory(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
-{
-	system("cls");
-
 	cout << " Инвентарь: \n";
 
-	for (int i = 0; i < player.CurrentInventoryCapacity; i++)
-	{
-		cout << player.Inventory[i] << " |";
-	}
+	for (int i = 0; i < player.Inventory->size(); i++)
+		cout << " |" << player.Inventory->at(i).Name << " - " << player.Inventory->at(i).Quantity << "| ";
 
-	switch (ChoiceCheck(1))
-	{
-	case 1: 
-	{
-		MainMenu(player, newUnit, newSquad, newShop); 
-	}
-	break;
-	}
+	cout << endl << endl;
+	cout << " Нажмите любую кнопку, чтобы вернуться в главное меню" << endl;
+	GetKey();
 }
-
-void RestInTavern(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
+void HeroArmy(Player& player, Companion& companion)
 {
 	system("cls");
-
-	if (CheckMoney(player.PlayerGold, 10) == true) 
-	{
-		player.PlayerGold = player.PlayerGold - 10;
-		player.PlayerHP = player.PlayerTotalHP;
-		cout << " Вы отдохнули.";
-	}
-	else
-	{
-		cout << " Хозяин таверны: Возвращайтесь, когда будет золото, уважаемый!";
-	}
-
-	cout << " \n";
-
-	switch (ChoiceCheck(1))
-	{
-	case 1: 
-	{
-		MainMenu(player, newUnit, newSquad, newShop); 
-	} 
-	break;
-	}
-}
-
-void Tavern(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop) 
-{
-	system("cls");
-
-	cout << " Хозяин таверны: Добро пожаловать в мою таверну, герой! Здесь для тебя найдется кров, еда и снаряжение.\n";
-	cout << " 1. Пополнить снаряжение.\n";
-	cout << " 2. Нанять людей.\n";
-	cout << " 3. Отдохнуть (10 золота, восстанавливает здоровье).\n";
-	cout << " 4. Вернуться в главное меню";
-	
-	cout << " \n";
-
-	switch (ChoiceCheck(4))
-	{
-	case 1: 
-	{ 
-		BuyItems(player, newUnit, newSquad, newShop); 
-	} 
-	break;
-	case 2: 
-	{ 
-		BuyMercenaries(player, newUnit, newSquad, newShop);  
-	} 
-	break;
-	case 3: 
-	{ 
-		RestInTavern(player, newUnit, newSquad, newShop); 
-	}
-	break;
-	case 4: 
-	{ 
-		MainMenu(player, newUnit, newSquad, newShop); 
-	} 
-	break;
-	}
-}
-
-void MainMenu(Player& player, Unit& newUnit, Squad& newSquad, Shop& newShop)
-{
-	system("cls");
-
-	cout << " " << player.PlayerName << ", выберите действие: \n";
-	cout << " 1. Посетить таверну.\n";
-	cout << " 2. Исследовать подземелье.\n";
-	cout << " 3. Характеристики героя\n";
-	cout << " 4. Армия героя.\n";
-	cout << " 5. Инвентарь.\n";
-
-	cout << " \n";
-
-	cout << " Выбор: ";
-	int Choice = 0;
-	cin >> Choice;
-
-	switch (Choice)
-	{
-	case 1: 
-	{ 
-		Tavern(player, newUnit, newSquad, newShop);  
-	} 
-	break;
-	case 2: 
-	{ 
-		Dungeon(player, newUnit, newSquad, newShop);  
-	} 
-	break;
-	case 3: 
-	{ 
-		HeroStats(player, newUnit, newSquad, newShop); 
-	} 
-	break;
-	case 4: 
-	{ 
-		HeroArmy(player, newUnit, newSquad, newShop);  
-	} 
-	break;
-	case 5: 
-	{ 
-		Inventory(player, newUnit, newSquad, newShop);
-	}
-	break;
-	}
+	cout << "\n Отряд " << player.Name << ":";
+	cout << "\n\n " << player.Name << "\nКласс: " << player.Class << "\tЗдоровье: " << player.HP << " / " << player.TotalHP << "\tЗащита: " << player.Defence << "\tУрон: " << (player.MinDamage + player.Damage) / 2.0;
+	cout << "\n\n " << companion.Name << "\nКласс: " << companion.Class << "\tЗдоровье: " << companion.HP << " / " << companion.TotalHP << "\tЗащита: " << companion.Defence << "\tУрон: " << companion.Damage;
+	cout << "\n\n Нажмите любую кнопку, чтобы вернуться в главное меню \n";
+	GetKey();
 }
