@@ -2,6 +2,8 @@
 #include <string>
 #include <ctime>
 #include "Helper.h"
+#include "Combat.h"
+#include "Player.h"
 
 using namespace std;
 

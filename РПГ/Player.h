@@ -5,6 +5,56 @@
 #include "Helper.h"
 using namespace std;
 
+//Класс предмета
+class Item {
+public:
+	string Name;
+	int Price;
+	int Quantity;
+	Item() {}
+	Item(string name, int price, int quantity) {
+		Name = name;
+		Price = price;
+		Quantity = quantity;
+	}
+};
+
+//Персонаж-компаньон для игрока, который не имеет прокачки и сражается в бою с отдельной от игрока логикой
+class Companion {
+public:
+	string Name;
+	string Class;
+	int TotalHP;
+	int HP;
+	int Defence;
+	int CurAttackCount;
+	int MaxAttackCount;
+	int Damage;
+	bool isSold;
+	int Price;
+
+	Companion(string name, string cclass, int fullhp, int hp, int def, int attcount, int maxattcount, int dmg, bool sold, int price) {
+		Name = name;
+		Class = cclass;
+		TotalHP = fullhp;
+		HP = hp;
+		Defence = def;
+		CurAttackCount = attcount;
+		MaxAttackCount = maxattcount;
+		Damage = dmg;
+		isSold = sold;
+		Price = price;
+	}
+};
+
+//Класс магазина в таверне
+class Shop
+{
+public:
+	vector <Item> Items;
+	vector <Companion> Companions;
+};
+
 //Персонаж игрока
 class Player
 {
@@ -146,8 +196,4 @@ public:
 		system("cls");
 	}
 };
-
-
-
 Player create();
-

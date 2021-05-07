@@ -4,7 +4,23 @@
 #include <iostream>
 #include <vector>
 #include "Helper.h"
+#include "Player.h"
 using namespace std;
+
+//Класс цели для атаки противника
+class Target {
+public:
+	string Name;
+	string Type;
+	int HP;
+	int Defence;
+	Target(string name, string type, int hp, int defence) {
+		Name = name;
+		Type = type;
+		HP = hp;
+		Defence = defence;
+	}
+};
 
 //Combat. Выводит отряд игрока
 void ShowHero(Player player, Companion companion);

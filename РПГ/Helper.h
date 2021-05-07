@@ -11,33 +11,6 @@ const string Races[8]{ "Полый", "Человек", "Гуманоид", "Нежить", "Демон", "Драко
 //Абилки боссов
 const string SpecialAbilities[5]{ "Таран", "Огненное дыхание", "Зачарование оружия", "Высасывание жизни", "Восстановление здоровья" };
 
-//Персонаж-компаньон для игрока, который не имеет прокачки и сражается в бою с отдельной от игрока логикой
-class Companion {
-public:
-	string Name;
-	string Class;
-	int TotalHP;
-	int HP;
-	int Defence;
-	int CurAttackCount;
-	int MaxAttackCount;
-	int Damage;
-	bool isSold;
-	int Price;
-
-	Companion(string name, string cclass, int fullhp, int hp, int def, int attcount, int maxattcount, int dmg, bool sold, int price) {
-		Name = name;
-		Class = cclass;
-		TotalHP = fullhp;
-		HP = hp;
-		Defence = def;
-		CurAttackCount = attcount;
-		MaxAttackCount = maxattcount;
-		Damage = dmg;
-		isSold = sold;
-		Price = price;
-	}
-};
 
 //Противник, сражающийся против игрока
 class Enemy
@@ -101,43 +74,6 @@ public:
 	}
 };
 
-//Класс цели для атаки противника
-class Target {
-public:
-	string Name;
-	string Type;
-	int HP;
-	int Defence;
-	Target(string name, string type, int hp, int defence) {
-		Name = name;
-		Type = type;
-		HP = hp;
-		Defence = defence;
-	}
-};
-
-//Класс предмета
-class Item {
-public:
-	string Name;
-	int Price;
-	int Quantity;
-	Item(){}
-	Item(string name, int price, int quantity) {
-		Name = name;
-		Price = price;
-		Quantity = quantity;
-	}
-};
-
-//Класс магазина в таверне
-class Shop
-{
-public:
-	vector <Item> Items;
-	vector <Companion> Companions;
-};
-
 //Класс награды за убийство
 class Reward
 {
@@ -156,9 +92,6 @@ public:
 	double isDungBoss;
 	Reward DungReward;
 };
-
-
-
 
 
 

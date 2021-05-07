@@ -1,3 +1,4 @@
+#pragma once
 #include "Helper.h"
 #include "Player.h"
 #include "Combat.h"
@@ -133,7 +134,7 @@ void LevelUp(Player& player) {
 	if (player.InventoryMaxCapacity != 25) {
 		player.InventoryMaxCapacity++;
 		cout << " Объём вашего рюкзака увеличен на 1. Текущая его вместимость: "
-			<< player.CurrentInventoryCapacity << " / " << player.InventoryMaxCapacity << "\n";
+			<< player.Inventory.size()<< " / " << player.InventoryMaxCapacity << "\n";
 	}
 	cout << " \n";
 
@@ -427,7 +428,7 @@ void BuyItems(Player& player, Shop& shop)
 		cout << "\n\t <-- Скупщик мусора -->\n";
 		cout << " Скупщик: Здравствуйте. Я - скупщик всего мусора, что вы мне принесёте. Я готов купить что угодно.";
 		Sleep(1000);
-		if (player.Inventory->empty())
+		if (player.Inventory.empty())
 			cout << "\n Скупщик: ... Вы пришли с пустыми руками? Серьезно? Проваливайте отсюда.";
 		else
 		{
@@ -435,33 +436,33 @@ void BuyItems(Player& player, Shop& shop)
 			{
 
 				cout << "\n Скупщик: Ну-с, посмотрим, что у вас есть...\n";
-				for (int i = 0; i < player.Inventory->size(); i++)
-					cout << " " << to_string(i + 1) << ". " << player.Inventory->at(i).Name << " | Количество: " << player.Inventory->at(i).Quantity << endl;
-				cout << player.Inventory->size() + 1 << ". Выход";
+				for (int i = 0; i < player.Inventory.size(); i++)
+					cout << " " << to_string(i + 1) << ". " << player.Inventory.at(i).Name << " | Количество: " << player.Inventory.at(i).Quantity << endl;
+				cout << player.Inventory.size() + 1 << ". Выход";
 
 				cout << "\n <-- Выберите предмет на продажу -->";
-				int Choice = ChoiceCheck(player.Inventory->size() + 1);
-				if (Choice == player.Inventory->size() + 1)
+				int Choice = ChoiceCheck(player.Inventory.size() + 1);
+				if (Choice == player.Inventory.size() + 1)
 				{
 					cout << "\n Скупщик: Прощайте.";
 					break;
 				}
-				cout << "\n Скупщик: Я куплю " << player.Inventory->at(Choice - 1).Name << " за " << player.Inventory->at(Choice - 1).Price << " золотых. Вы согласны?";
+				cout << "\n Скупщик: Я куплю " << player.Inventory.at(Choice - 1).Name << " за " << player.Inventory.at(Choice - 1).Price << " золотых. Вы согласны?";
 				cout << "\n 1. Да";
 				cout << "\n 2. Нет";
 
 				if (ChoiceCheck(2) == 1)
 				{
 					cout << "\n Скупщик: Отлично! Это пополнит мою коллекцию.";
-					player.Gold += player.Inventory->at(Choice - 1).Price;
-					player.Inventory->at(Choice - 1).Quantity--;
-					if (player.Inventory->at(Choice - 1).Quantity == 0)
-						player.Inventory->erase(player.Inventory->begin() + Choice - 1);
+					player.Gold += player.Inventory.at(Choice - 1).Price;
+					player.Inventory.at(Choice - 1).Quantity--;
+					if (player.Inventory.at(Choice - 1).Quantity == 0)
+						player.Inventory.erase(player.Inventory.begin() + Choice - 1);
 				}
 				else cout << "\n Скупщик: Как скажете.";
 
 
-				if (player.Inventory->empty()) {
+				if (player.Inventory.empty()) {
 					cout << "\n Скупщик: Кажется, у вас закончился мусор. Можете спокойно валить отсюда и не возвращаться, пока у вас не появится новый.";
 					break;
 				}
@@ -906,7 +907,7 @@ void ChooseRandomFloor(Player& player, Companion& companion, NewDungeon& dungeon
 	if (!Enemies.empty()) {
 		cout << "\n Начинается бой...";
 		Sleep(3000);
-		Combat(player, companion, Enemies, dungeon);
+		Combat(player, companion, Enemies);
 		cout << "\n Битва завершена. Вот ваша награда:\n";
 		BattleReward = CalculateReward(dungeon.DungDifficulty, Enemies);
 		cout << " Опыт: " << BattleReward.Experience << "\t Золото: " << BattleReward.Gold;
@@ -1039,8 +1040,8 @@ void HeroStats(Player& player)
 	cout << " \n";
 	cout << " Инвентарь: \n";
 
-	for (int i = 0; i < player.Inventory->size(); i++)
-		cout << " |" << player.Inventory->at(i).Name << " - " << player.Inventory->at(i).Quantity << "| ";
+	for (int i = 0; i < player.Inventory.size(); i++)
+		cout << " |" << player.Inventory.at(i).Name << " - " << player.Inventory.at(i).Quantity << "| ";
 
 	cout << endl << endl;
 	cout << " Нажмите любую кнопку, чтобы вернуться в главное меню" << endl;
