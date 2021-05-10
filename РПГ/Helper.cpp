@@ -221,7 +221,7 @@ int Random(int min, int max)
 		return min + rand() % (abs(min) + max);
 	}
 }
-void CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
+bool CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
 {
 	if (Enemies.at(id).HP <= 0)
 	{
@@ -229,7 +229,7 @@ void CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
 		Enemies.erase(Enemies.begin() + id);
 	}
 }
-void CheckDeath(DungeonBoss& boss)
+bool CheckDeath(DungeonBoss& boss)
 {
 	if (boss.HP <= 0)
 	{
@@ -258,6 +258,8 @@ void CheckDeath(Player player) {
 		cout << "\tМагическая сила: " << player.MagicPower << "\n";
 		cout << "\tМана: " << player.Mana << " / " << player.MaxMana << "\n";
 		cout << "\tЗолото: " << player.Gold << "\n";
+		cout << "\tКоличество убитых противников: " << player.EnemiesKilledCount << "\n";
+
 		cout << "\n";
 		cout << "\n\n\n" << endl;
 		cout << "\tНажмите любую кнопку " << endl;

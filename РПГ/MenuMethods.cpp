@@ -465,8 +465,6 @@ void ChooseRandomFloor(Player& player, Companion& companion, SomeDungeon& dungeo
 
 		for (int i = 0; i < 5; i++)
 			Enemies.push_back(Enemy(" Полый крестьянин [" + to_string(i + 1) + "]", 0, 80 * dungeon.DungDifficulty, 17 * dungeon.DungDifficulty, 2));
-
-		GetKey();
 		switch (ChoiceCheck(4)) {
 		case 1:
 		{

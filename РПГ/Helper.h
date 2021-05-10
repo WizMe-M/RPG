@@ -27,13 +27,13 @@ int DecreaseDmgByDef(int damage, int defence);
 int Random(int min, int max);
 
 //Combat. ѕровер€ет "смерть" противника, устанавливает некоторые его параметры как мЄртвого, уменьшает количество "живых" противников
-void CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id);
+bool CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id);
 //Combat. ѕровер€ет жив ли игрок и если нет, выводит статистику и завершает игру
 void CheckDeath(Player player);
 //Combat. ѕровер€ет жив ли компаньон игрока
 void CheckDeath(Player& p, Companion& c);
 //Combat. ѕровер€ет жив ли игрок и если нет, выводит статистику и завершает игру
-void CheckDeath(DungeonBoss& boss);
+bool CheckDeath(DungeonBoss& boss);
 
 
 
