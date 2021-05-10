@@ -96,6 +96,10 @@ Player create()
 	player.Inventory.push_back(Item("Эстус", 0, 3));
 	player.haveCompanion = true;
 	player.SpecialAbilityCooldown = 0;
+	player.EnemiesKilledCount = 0;
+	player.Level = 1;
+	player.Experience = 0;
+	player.MaxExp = 50;
 	system("cls");
 	cout << "\n\n\tСоздаём персонажа";
 	for (int i = 0; i < 3; i++)

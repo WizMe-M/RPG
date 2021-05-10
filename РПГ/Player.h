@@ -20,9 +20,9 @@ class Player
 public:
 	string Name;
 	string Class;
-	int Level = 1;
-	int MaxExp = 50;
-	int Experience = 0;
+	int Level;
+	int MaxExp;
+	int Experience;
 	int TotalHP;
 	int HP;
 	int Damage;

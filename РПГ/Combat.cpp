@@ -157,7 +157,11 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 					else cout << "\n Недостаточно маны для применения особого умения (нужно по-крайней мере 20 маны).";
 				}
 			}
-			else cout << "\n Ваша способность ещё на перезарядке!";
+			else
+			{
+				cout << "\n Ваша способность ещё на перезарядке!";
+				Sleep(1000);
+			}
 		}
 		break;
 		case 3:
