@@ -2,29 +2,45 @@
 #include <string>
 #include <windows.h>
 #include <iostream>
+#include <vector>
+#include "Item.h"
 
-using std::string;
+using namespace std;
 
+//Helper. Циклично запрашивает ввод числа в диапазоне от 1 до максимального, пока не будет введено корректное значение
+int ChoiceCheck(int max);
+//ChoiceCheck. Ввод, пока не число 
+int InputStringToInt();
+//Hepler. Приостанавливает программу пока не будет нажата клавиша
+void GetKey();
+
+//Персонаж игрока
 class Player
 {
 public:
-	string PlayerName;
-	string PlayerClass;
-	double PlayerTotalHP;
-	double PlayerHP;
-	double PlayerLevel;
-	double PlayerDamage;
-	double PlayerMinDamage;
-	double PlayerDefence;
-	double PlayerKnowledge;
-	double PlayerMagicPower;
-	int PlayerMana;
-	int PlayerGold;
-
-	string Inventory[15];
-	int CurrentInventoryCapacity;
+	string Name;
+	string Class;
+	int Level = 1;
+	int MaxExp = 50;
+	int Experience = 0;
+	int TotalHP;
+	int HP;
+	int Damage;
+	int MinDamage;
+	int Defence;
+	int MagicPower;
+	int Mana;
+	int MaxMana;
+	int Gold;
+	vector <Item> Inventory;
 	int InventoryMaxCapacity;
+
+	int HPperLVL;
+	int DMGperLVL;
+	int DEFperLVL;
+	int MPperLVL;
+	int MANAperLVL;
+	bool haveCompanion;
+	int SpecialAbilityCooldown;
 };
-
 Player create();
-

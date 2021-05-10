@@ -141,13 +141,22 @@
   <ItemGroup>
     <ClCompile Include="Combat.cpp" />
     <ClCompile Include="Helper.cpp" />
+    <ClCompile Include="MenuMethods.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="РПГ.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Boss.h" />
     <ClInclude Include="Combat.h" />
+    <ClInclude Include="Companion.h" />
+    <ClInclude Include="Dungeon.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="MenuMethods.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Reward.h" />
+    <ClInclude Include="Shop.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

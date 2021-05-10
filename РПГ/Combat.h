@@ -2,45 +2,50 @@
 #include <string>
 #include <windows.h>
 #include <iostream>
-#include "Player.h"
+#include <vector>
 
-using namespace std;
-using std::string;
+#include "Helper.h"
 
-class Squad
-{
+//Класс цели для атаки противника
+class Target {
 public:
-	int SquadQuantity;
-	int SquadTotalNumber;
-	string SquadNames[5];
+	string Name;
+	string Type;
+	int HP;
+	int Defence;
+	Target(string name, string type, int hp, int defence) {
+		Name = name;
+		Type = type;
+		HP = hp;
+		Defence = defence;
+	}
 };
 
-class Enemy
-{
-public:
-	int EnemyQuantity;
-	int LastQuantity;
-	string EnemyName[10];
-	string EnemyClass[10];
-	double EnemyHP[10];
-	double EnemyDamage[10];
-};
+//Combat. Выводит отряд игрока
+void ShowHero(Player player, Companion companion);
 
-class Unit
-{
-public:
-	string UnitName[5];
-	string UnitClass[5];
-	double UntiHP[5];
-	double UnitTotalHP[5];
-	double UntiDamage[5];
-};
+//Combat. Выводит отряд противников (живых и мёртвых)
+void ShowEnemies(vector<Enemy> Enemies, vector<Enemy> DeadEnemies);
 
-class Reward
-{
-public:
-	int Gold;
-};
+//Combat. Выводит статы босса
+void ShowBoss(DungeonBoss boss);
 
-int Combat(Squad& newSquad, Unit& newUnit, Enemy& newEnemy, Player& player);
+//Dungeon. Главный метод ведения боя против рядовых противников
+void Combat(Player& player, Companion& companion, vector<Enemy>& Enemies);
+
+//Combat. Ход игрока и компаньона против рядовых противников
+void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies);
+
+//Combat. Ход рядовых противников 
+void EnemyTurn(Player& player, Companion& companion, vector<Enemy>& Enemies);
+
+//Dungeon. Главный метод ведения боя против босса
+void Combat(Player& player, Companion& companion, DungeonBoss& boss);
+
+//Combat. Ход игрока против босса
+void PlayerTurn(Player& player, Companion& companion, DungeonBoss& boss);
+
+//Combat. Ход босса 
+void EnemyTurn(Player& player, Companion& companion, DungeonBoss& boss);
+
 
