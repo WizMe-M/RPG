@@ -2,14 +2,56 @@
 #include "Helper.h"
 #include "Combat.h"
 
+#include <direct.h>
+#include <sys\stat.h>
+
 using namespace std;
 
 /*Здесь находятся функции, необходимые для организации алгоритма работы программы*/
+
+const char* path = "D:/saves/";
 
 void MainMenu(Player& player, Companion& сompanion, Shop& shop)
 {
 	while (true)
 	{
+		player.SpecialAbilityCooldown = 0;
+		//сохранение
+		{
+			int _ = _mkdir(path);
+			ofstream file;
+			file.open(path + player.Name + ".txt");
+			if (file.is_open())
+			{
+				file << player.Class << "\n";
+				file << player.Level << "\n";
+				file << player.Experience << "\n";
+				file << player.MaxExp << "\n";
+				file << player.HP << "\n";
+				file << player.TotalHP << "\n";
+				file << player.Defence << "\n";
+				file << player.MinDamage << "\n";
+				file << player.Damage << "\n";
+				file << player.MagicPower << "\n";
+				file << player.Mana << "\n";
+				file << player.MaxMana << "\n";
+				file << player.Gold << "\n";
+				file << player.HPperLVL << "\n";
+				file << player.DMGperLVL << "\n";
+				file << player.DEFperLVL << "\n";
+				file << player.MPperLVL << "\n";
+				file << player.MANAperLVL << "\n";
+				file << player.haveCompanion << "\n";
+				file << player.EnemiesKilledCount << "\n";
+				file << player.Inventory.size() << "\n";
+				if (player.Inventory.size() != 0)
+					for (int i = 0; i < player.Inventory.size(); i++)
+						file << player.Inventory.at(i).Name << " " << player.Inventory.at(i).Price << " " << player.Inventory.at(i).Quantity << "\n";
+				file.close();
+				
+			}
+		}
+		
 		system("cls");
 		cout << "\n\t<-- Главное Меню -->\n";
 		cout << "\n " << player.Name << ", выберите действие: \n";

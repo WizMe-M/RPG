@@ -42,5 +42,6 @@ public:
 	int MANAperLVL;
 	bool haveCompanion;
 	int SpecialAbilityCooldown;
+	int EnemiesKilledCount;
 };
 Player create();

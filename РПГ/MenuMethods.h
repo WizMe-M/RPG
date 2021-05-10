@@ -2,6 +2,8 @@
 #include "Helper.h"
 #include "Shop.h"
 #include "Dungeon.h"
+#include <fstream>
+#include <sstream>
 
 //Главное меню игры, куда игрок постоянно возвращается после похода в Данж
 void MainMenu(Player& player, Companion& companion, Shop& shop);
