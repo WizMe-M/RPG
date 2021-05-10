@@ -17,12 +17,6 @@ int main()
 	SetConsoleOutputCP(1251);
 
 
-	Companion companion("Лаврентий", "Воин", 160, 120, 35, 10, 20, 40, true, 0);
-
-	Shop shop;
-	shop.Companions.push_back(Companion("Лоскутик", "Воин", 200, 200, 49, 30, 30, 60, false, 500));
-	shop.Items.push_back(Item("Эстус", 100, 50));
-
 	cout << "\n\tУ вас есть созданный персонаж?";
 	cout << "\n\t1. Да";
 	cout << "\n\t2. Нет\n";
@@ -35,6 +29,8 @@ int main()
 		ifstream a;
 		string f;
 		int n;
+		Companion c;
+		Shop s;
 		Player p;
 		p.Name = name;
 		a.open(path);
@@ -71,15 +67,59 @@ int main()
 					p.Inventory.push_back(item);
 				}
 
+			a >> c.Name;
+			a >> c.Class;
+			a >> c.HP;
+			a >> c.TotalHP;
+			a >> c.Defence;
+			a >> c.CurAttackCount;
+			a >> c.MaxAttackCount;
+			a >> c.Damage;
+
+			a >> n;
+			if (n != 0);
+			for (int i = 0; i < n; i++) {
+				Companion comp;
+				a >> comp.Name;
+				a >> comp.Class;
+				a >> comp.HP;
+				a >> comp.TotalHP;
+				a >> comp.Defence;
+				a >> comp.CurAttackCount;
+				a >> comp.MaxAttackCount;
+				a >> comp.Damage;
+				a >> comp.Price;
+				a >> comp.isSold;
+				s.Companions.push_back(comp);
+			}
+			
+			a >> n;
+			if (n != 0);
+			for (int i = 0; i < n; i++) {
+				Item item;
+				a >> item.Name;
+				a >> item.Price;
+				a >> item.Quantity;
+				s.Items.push_back(item);
+			}
 			a.close();
 
-			MainMenu(p, companion, shop);
+			MainMenu(p, c, s);
 
 		}
-		else cout << "\n\tФайл не существует";
+		else
+		{
+			cout << "\n\tПерсонаж с таким именем не существует.";
+			Sleep(2000);
+		}
 	}
 	system("cls");
 	Player player = create();
+
+	Companion companion("Лаврентий", "Воин", 160, 120, 35, 10, 20, 40, true, 0);
+	Shop shop;
+	shop.Companions.push_back(Companion("Лоскутик", "Воин", 200, 200, 49, 30, 30, 60, false, 500));
+	shop.Items.push_back(Item("Эстус", 100, 50));
 
 	MainMenu(player, companion, shop);
 }

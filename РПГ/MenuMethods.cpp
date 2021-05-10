@@ -10,12 +10,12 @@ using namespace std;
 
 const char* path = "D:\\saves\\";
 
-void MainMenu(Player& player, Companion& ñompanion, Shop& shop)
+void MainMenu(Player& player, Companion& companion, Shop& shop)
 {
 	while (true)
 	{
 		player.SpecialAbilityCooldown = 0;
-		//ñîõğàíåíèå
+		//ñîõğàíåíèå 
 		{
 			int _ = _mkdir(path);
 			ofstream file;
@@ -42,6 +42,36 @@ void MainMenu(Player& player, Companion& ñompanion, Shop& shop)
 				if (player.Inventory.size() != 0)
 					for (int i = 0; i < player.Inventory.size(); i++)
 						file << player.Inventory.at(i).Name << " " << player.Inventory.at(i).Price << " " << player.Inventory.at(i).Quantity << endl;
+
+				file << companion.Name << endl;
+				file << companion.Class << endl;
+				file << companion.HP << " " << companion.TotalHP << endl;
+				file << companion.Defence << endl;
+				file << companion.CurAttackCount << endl;
+				file << companion.MaxAttackCount << endl;
+				file << companion.Damage << endl;
+
+				file << shop.Companions.size();
+				if (shop.Companions.size() != 0)
+					for (int i = 0; i < shop.Companions.size(); i++)
+						file << shop.Companions.at(i).Name << " "
+						<< shop.Companions.at(i).Class << " "
+						<< shop.Companions.at(i).HP << " "
+						<< shop.Companions.at(i).TotalHP << " "
+						<< shop.Companions.at(i).Defence << " "
+						<< shop.Companions.at(i).CurAttackCount << " "
+						<< shop.Companions.at(i).MaxAttackCount << " "
+						<< shop.Companions.at(i).Damage << " " 
+						<< shop.Companions.at(i).Price << " "
+						<< shop.Companions.at(i).isSold << endl;
+				
+				file << shop.Items.size();
+				if (shop.Items.size() != 0)
+					for (int i = 0; i < shop.Items.size(); i++)
+						file << shop.Items.at(i).Name << " "
+						<< shop.Items.at(i).Price << " "
+						<< shop.Items.at(i).Quantity << endl;
+
 				file.close();				
 			}
 		}
@@ -56,16 +86,16 @@ void MainMenu(Player& player, Companion& ñompanion, Shop& shop)
 		switch (ChoiceCheck(4))
 		{
 		case 1:
-			Tavern(player, ñompanion, shop);
+			Tavern(player, companion, shop);
 			break;
 		case 2:
-			Dungeon(player, ñompanion);
+			Dungeon(player, companion);
 			break;
 		case 3:
 			HeroStats(player);
 			break;
 		case 4:
-			HeroArmy(player, ñompanion);
+			HeroArmy(player, companion);
 			break;
 		}
 	}

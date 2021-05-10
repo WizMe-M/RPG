@@ -240,8 +240,10 @@ void CheckDeath(DungeonBoss& boss)
 void CheckDeath(Player player) {
 	Sleep(1000);
 	if (player.HP <= 0) {
+
 		string path = "D:\\saves\\" + player.Name + ".txt";
 		remove(path.c_str());
+
 		system("cls");
 		cout << "\n\n\n \t\t YOU DIED \n\n";
 

@@ -15,7 +15,8 @@ public:
 	int Damage;
 	bool isSold;
 	int Price;
-
+	
+	Companion(){}
 	Companion(string name, string cclass, int fullhp, int hp, int def, int attcount, int maxattcount, int dmg, bool sold, int price) {
 		Name = name;
 		Class = cclass;

@@ -87,18 +87,21 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 			cout << " " << player.Name << " атакует " << Enemies.at(Choice).Name << " и оставл€ет ему " << Enemies.at(Choice).HP << " здоровь€.\n";
 			CheckDeath(Enemies, DeadEnemies, Choice);
 
-			Sleep(1000);
-			if (companion.CurAttackCount != 0 && Enemies.size() != 0)
+			if (player.haveCompanion)
 			{
-				int RandAttack;
-				if (Enemies.size() == 1) RandAttack = 0;
-				else RandAttack = Random(0, Enemies.size());
+				Sleep(1000);
+				if (companion.CurAttackCount != 0 && Enemies.size() != 0)
+				{
+					int RandAttack;
+					if (Enemies.size() == 1) RandAttack = 0;
+					else RandAttack = Random(0, Enemies.size());
 
-				Enemies.at(RandAttack).HP -= companion.Damage;
-				cout << " " << companion.Name << " атакует " << Enemies.at(RandAttack).Name << " и оставл€ет ему "
-					<< Enemies.at(RandAttack).HP << " здоровь€. ";
-				companion.CurAttackCount--;
-				CheckDeath(Enemies, DeadEnemies, RandAttack);
+					Enemies.at(RandAttack).HP -= companion.Damage;
+					cout << " " << companion.Name << " атакует " << Enemies.at(RandAttack).Name << " и оставл€ет ему "
+						<< Enemies.at(RandAttack).HP << " здоровь€. ";
+					companion.CurAttackCount--;
+					CheckDeath(Enemies, DeadEnemies, RandAttack);
+				}
 			}
 			isActed = true;
 			break;
@@ -157,11 +160,7 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 					else cout << "\n Ќедостаточно маны дл€ применени€ особого умени€ (нужно по-крайней мере 20 маны).";
 				}
 			}
-			else
-			{
-				cout << "\n ¬аша способность ещЄ на перезар€дке!";
-				Sleep(1000);
-			}
+			else cout << "\n ¬аша способность ещЄ на перезар€дке!";
 		}
 		break;
 		case 3:
