@@ -61,10 +61,10 @@ void MainMenu(Player& player, Companion& companion, Shop& shop)
 						<< shop.Companions.at(i).Defence << " "
 						<< shop.Companions.at(i).CurAttackCount << " "
 						<< shop.Companions.at(i).MaxAttackCount << " "
-						<< shop.Companions.at(i).Damage << " " 
+						<< shop.Companions.at(i).Damage << " "
 						<< shop.Companions.at(i).Price << " "
 						<< shop.Companions.at(i).isSold << endl;
-				
+
 				file << shop.Items.size();
 				if (shop.Items.size() != 0)
 					for (int i = 0; i < shop.Items.size(); i++)
@@ -72,7 +72,7 @@ void MainMenu(Player& player, Companion& companion, Shop& shop)
 						<< shop.Items.at(i).Price << " "
 						<< shop.Items.at(i).Quantity << endl;
 
-				file.close();				
+				file.close();
 			}
 		}
 
@@ -250,7 +250,9 @@ void BuyMercenaries(Player& player, Companion& companion, Shop& shop)
 		cout << "\n\t<-- Найм компаньонов -->\n";
 		cout << " Главарь наёмников: Приветствую и бла-бла. Выбирай бойца.\n";
 		for (int i = 0; i < shop.Companions.size(); i++)
-			cout << " " << to_string(i + 1) << ". " << shop.Companions.at(i).Name << " | Класс: " << shop.Companions.at(i).Class
+			cout << " " << to_string(i + 1) << ". " << shop.Companions.at(i).Name
+			<< " | Цена: " << shop.Companions.at(i).Price
+			<< " | Класс: " << shop.Companions.at(i).Class
 			<< " | Здоровье: " << shop.Companions.at(i).TotalHP << " | Защита: " << shop.Companions.at(i).Defence
 			<< " | Урон: " << shop.Companions.at(i).Damage << " | Количество атак: " << shop.Companions.at(i).MaxAttackCount << "\n";
 		cout << "\n " << shop.Companions.size() + 1 << ". Выход\n";
@@ -259,31 +261,37 @@ void BuyMercenaries(Player& player, Companion& companion, Shop& shop)
 		if (Choice == shop.Companions.size()) return;
 
 		if (!shop.Companions.at(Choice).isSold)
-			if (player.haveCompanion)
+			if (CheckMoney(player.Gold, shop.Companions.at(Choice).Price))
 			{
-				cout << "\n У вас уже есть компаньон " << companion.Name << ":\n";
-				cout << " Класс: " << companion.Class << " | Здоровье: " << companion.HP << " / " << companion.TotalHP << " | Защита: " << companion.Defence
-					<< " | Урон: " << companion.Damage << " | Количество атак: " << companion.CurAttackCount << " / " << companion.MaxAttackCount;
-				cout << "\n\n Хотите его заменить?";
-				cout << "\n 1. Да";
-				cout << "\n 2. Нет";
-				if (ChoiceCheck(2) == 1)
+				if (player.haveCompanion)
 				{
+					cout << "\n У вас уже есть компаньон " << companion.Name << ":\n";
+					cout << " Класс: " << companion.Class << " | Здоровье: " << companion.HP << " / " << companion.TotalHP << " | Защита: " << companion.Defence
+						<< " | Урон: " << companion.Damage << " | Количество атак: " << companion.CurAttackCount << " / " << companion.MaxAttackCount;
+					cout << "\n\n Хотите его заменить?";
+					cout << "\n 1. Да";
+					cout << "\n 2. Нет";
+					if (ChoiceCheck(2) == 1)
+					{
+						companion = shop.Companions.at(Choice);
+						shop.Companions.at(Choice).isSold = true;
+						shop.Companions.at(Choice).Name += " (ПРОДАН)";
+						return;
+					}
+				}
+				else
+				{
+					cout << "\n Вы наняли компаньона " << companion.Name;
 					companion = shop.Companions.at(Choice);
 					shop.Companions.at(Choice).isSold = true;
 					shop.Companions.at(Choice).Name += " (ПРОДАН)";
 					return;
 				}
+
 			}
-			else
-			{
-				cout << "\n Вы наняли компаньона " << companion.Name;
-				companion = shop.Companions.at(Choice);
-				shop.Companions.at(Choice).isSold = true;
-				shop.Companions.at(Choice).Name += " (ПРОДАН)";
-				return;
-			}
+			else cout << "\n У вас недостаточно денег для найма";
 		else cout << "\n Этот наёмник уже был нанят.";
+
 	}
 	cout << "\n Нажмите любую кнопку, чтобы вернуться в таверну" << endl;
 	GetKey();

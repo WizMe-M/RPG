@@ -227,7 +227,9 @@ bool CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
 	{
 		DeadEnemies.push_back(Enemies.at(id));
 		Enemies.erase(Enemies.begin() + id);
+		return true;
 	}
+	return false;
 }
 bool CheckDeath(DungeonBoss& boss)
 {
@@ -235,7 +237,9 @@ bool CheckDeath(DungeonBoss& boss)
 	{
 		boss.Name += " (Ì¨ÐÒÂ)";
 		boss.isDead = true;
+		return true;
 	}
+	return false;
 }
 void CheckDeath(Player player) {
 	Sleep(1000);

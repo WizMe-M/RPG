@@ -81,7 +81,7 @@ void PlayerTurn(Player& player, Companion& companion, vector<Enemy>& Enemies, ve
 		case 1:
 		{
 			cout << "\n <-- Выберите противника для атаки -->\n";
-			Choice = ChoiceCheck(Enemies.size() + 1) - 1;
+			Choice = ChoiceCheck(Enemies.size()) - 1;
 
 			Enemies.at(Choice).HP -= (Random(player.MinDamage, player.Damage) + player.MagicPower);
 			cout << " " << player.Name << " атакует " << Enemies.at(Choice).Name << " и оставляет ему " << Enemies.at(Choice).HP << " здоровья.\n";
