@@ -221,27 +221,33 @@ int Random(int min, int max)
 		return min + rand() % (abs(min) + max);
 	}
 }
-void CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
+bool CheckDeath(vector<Enemy>& Enemies, vector<Enemy>& DeadEnemies, int id)
 {
 	if (Enemies.at(id).HP <= 0)
 	{
 		DeadEnemies.push_back(Enemies.at(id));
 		Enemies.erase(Enemies.begin() + id);
+		return true;
 	}
+	return false;
 }
-void CheckDeath(DungeonBoss& boss)
+bool CheckDeath(DungeonBoss& boss)
 {
 	if (boss.HP <= 0)
 	{
 		boss.Name += " (МЁРТВ)";
 		boss.isDead = true;
+		return true;
 	}
+	return false;
 }
 void CheckDeath(Player player) {
 	Sleep(1000);
 	if (player.HP <= 0) {
+
 		string path = "D:\\saves\\" + player.Name + ".txt";
 		remove(path.c_str());
+
 		system("cls");
 		cout << "\n\n\n \t\t YOU DIED \n\n";
 
@@ -256,6 +262,8 @@ void CheckDeath(Player player) {
 		cout << "\tМагическая сила: " << player.MagicPower << "\n";
 		cout << "\tМана: " << player.Mana << " / " << player.MaxMana << "\n";
 		cout << "\tЗолото: " << player.Gold << "\n";
+		cout << "\tКоличество убитых противников: " << player.EnemiesKilledCount << "\n";
+
 		cout << "\n";
 		cout << "\n\n\n" << endl;
 		cout << "\tНажмите любую кнопку " << endl;
